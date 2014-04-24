@@ -1,9 +1,9 @@
 development:
-  mainstream: &mainstream
+  dapaas: &dapaas
     type: elasticsearch
     server: localhost
     port: 9200
-    index_name: "mainstream"
+    index_name: "dapaas"
   detailed: &detailed
     type: elasticsearch
     server: localhost
@@ -15,7 +15,7 @@ development:
     port: 9200
     index_name: "government"
   primary:
-    *mainstream
+    *dapaas
 test:
   primary:
     type: none
