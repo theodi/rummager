@@ -6,7 +6,7 @@ require "ses_mailer"  # For the exception_notification initialiser
 require "config/logging"
 
 set :search_config, SearchConfig.new
-set :default_index_name, "mainstream"
+set :default_index_name, "dapaas"
 
 configure :development do
   set :protection, false

@@ -1,5 +1,5 @@
 base_uri: "http://localhost:9200"
-index_names: ["mainstream"]
+index_names: ["dapaas"]
 
 # ODI: these can all be ignored
 organisation_registry_index: "government"
