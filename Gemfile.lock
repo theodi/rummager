@@ -1,3 +1,15 @@
+GIT
+  remote: git://github.com/theodi/gds-api-adapters.git
+  revision: fe9a4730ea6bcc16cf3bbcf9e24d86628475ae8f
+  specs:
+    gds-api-adapters (7.25.0)
+      activesupport
+      link_header
+      lrucache (~> 0.1.1)
+      null_logger
+      plek
+      rest-client (~> 1.6.3)
+
 GEM
   remote: https://rubygems.org/
   remote: https://BnrJb6FZyzspBboNJzYZ@gem.fury.io/govuk/
@@ -24,16 +36,10 @@ GEM
     ffi (1.9.0)
     ffi-aspell (0.0.3)
       ffi (>= 1.0.11)
-    gds-api-adapters (7.18.0)
-      link_header
-      lrucache (~> 0.1.1)
-      null_logger
-      plek
-      rest-client (~> 1.6.3)
     i18n (0.6.0)
     json (1.7.7)
     kgio (2.8.0)
-    link_header (0.0.7)
+    link_header (0.0.8)
     listen (1.2.2)
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
@@ -133,7 +139,7 @@ DEPENDENCIES
   aws-ses (= 0.4.4)
   ci_reporter (= 1.7.1)
   ffi-aspell (= 0.0.3)
-  gds-api-adapters (= 7.18.0)
+  gds-api-adapters!
   json (= 1.7.7)
   logging (= 1.8.1)
   minitest (= 4.6.1)
