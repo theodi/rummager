@@ -204,6 +204,8 @@ class Rummager < Sinatra::Application
   # Parameters:
   #   q: User-entered search query
   #
+  #   TODO:role: index to use
+  #
   #   start: Position in search result list to start returning results
   #   (0-based)
   #
@@ -273,23 +275,12 @@ class Rummager < Sinatra::Application
   #       }
   #     }
   #
+  # ODI TO USE THIS ONE.
   get "/unified_search.?:request_format?" do
     json_only
 
-    registries = {
-      organisation_registry: organisation_registry,
-      topic_registry: topic_registry,
-      document_series_registry: document_series_registry,
-      document_collection_registry: document_collection_registry,
-      world_location_registry: world_location_registry
-    }
-    registry_by_field = {
-      organisations: organisation_registry,
-      topics: topic_registry,
-      document_series: document_series_registry,
-      document_collections: document_collection_registry,
-      world_locations: world_location_registry
-    }
+    registries = {}
+    registry_by_field = {}
 
     parser = SearchParameterParser.new(request.params)
 
@@ -299,7 +290,6 @@ class Rummager < Sinatra::Application
         error: parser.error,
       })
     end
-
     searcher = UnifiedSearcher.new(unified_index, registries, registry_by_field)
     MultiJson.encode searcher.search(parser.parsed_params)
   end
