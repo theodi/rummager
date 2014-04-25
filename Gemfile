@@ -21,7 +21,7 @@ gem "sidekiq", "2.13.0"
 gem "redis-namespace", "1.3.1"
 gem "newrelic_rpm", "3.6.7.152"
 gem "plek", "1.5.0"
-gem "gds-api-adapters", "7.18.0"
+gem "gds-api-adapters", :github => 'theodi/gds-api-adapters'
 gem "rack-logstasher", "0.0.3"
 gem "unf", "0.1.3"
 
