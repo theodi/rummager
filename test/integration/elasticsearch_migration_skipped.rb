@@ -53,7 +53,7 @@ class ElasticsearchMigrationTest < IntegrationTest
     assert_equal links, parsed_response["results"].map { |r| r["link"] }
   end
 
-  def test_full_reindex
+  def test_full_reindex_pending
     # Test that a reindex re-adds all the documents with new
     # stemming settings
 
