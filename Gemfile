@@ -1,3 +1,6 @@
+ruby "1.9.3"
+#ruby-gemset=rummager
+
 source "https://rubygems.org"
 source "https://BnrJb6FZyzspBboNJzYZ@gem.fury.io/govuk/"
 
