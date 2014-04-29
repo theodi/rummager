@@ -13,13 +13,6 @@ To create indices, or to update them to the latest index settings, run:
 
     RUMMAGER_INDEX=all bundle exec rake rummager:migrate_index
 
-If you have indices from a Rummager instance before aliased indices, run:
-
-    RUMMAGER_INDEX=all bundle exec rake rummager:migrate_from_unaliased_index
-
-If you don't know which of these you need to run, try running the first one; it
-will fail safely with an error if you have an unmigrated index.
-
 Rummager has an asynchronous mode, disabled in development by default, that
 posts documents to a queue to be indexed later by a worker. To run this in
 development, you need to run both of these commands:
@@ -27,66 +20,28 @@ development, you need to run both of these commands:
     ENABLE_QUEUE=1 ./startup.sh
     bundle exec rake jobs:work
 
-## Indexing GOV.UK content
+## Indexing content
 
-In order to build the search index on a VM, you'll need to ensure that your VM
-has sufficient memory: 4Gb is probably a good amount; with 2Gb, the indexing
-process has a tendency to get killed by the out of memory killer.  Do this by
-adding a `Vagrantfile.localconfig` to the same directory as your Vagrantfile:
+You will need Panopticon and Rummager running. 
 
-    $ cat ./Vagrantfile.localconfig
-    config.vm.provider :virtualbox do |vm|
-      vm.customize [ "modifyvm", :id, "--memory", "4096", "--cpus", "2" ]
-    end
+To build an index from scratch you will need to be in Publisher repo and run:
 
-It's probably a good idea to give elasticsearch more memory, too, since that
-will make indexing faster, and also avoid risk of elasticsearch running out of
-memory and killing itself.  Do this by editing
-/etc/init/elasticsearch-govuk-development.conf to include the line:
+  bundle exec rake panopticon:register
 
-    env ES_HEAP_SIZE="1024m"
+This will loop through each published edition and create a RegisterableEdition which will call Panopticon to update it's artefact with. 
 
-Restart the VM (eg, with `vagrant reload`) after making these changes.
+Remember: the on save observer in panopticon is what fires off the submit to Elasticsearch.
 
-Since search indexing happens through Panopticon's single registration API,
-you'll need to have both Panopticon and Rummager running. By default, Panopticon
-will not try to index search content in development mode, so you'll need to pass
-an extra environment variable to it.
+By default, Panopticon will not try to index search content in development mode, so you'll need to have an extra environment variable to it.
 
-If you have [Bowler](https://github.com/JordanHatch/bowler) installed, you can
-set these both running with a single command from the `development` repository:
+  UPDATE_SEARCH=1
 
-    UPDATE_SEARCH=1 bowl panopticon rummager
-
-The next stage is to register content from the applications you want. For
-example:
-
-  * Business Support Finder
-  * Calendars
-  * Licence Finder
-  * Publisher
-  * Smart Answers
-  * Trade Tariff
-
-To re-register content for a single application, go to its directory and run:
-
-    bundle exec rake panopticon:register
-
-To register content for all the applications, go to the `replication` directory
-in the `development` project and run:
-
-    ./rebuild-search-local.sh
-
-To rebuild from the Whitehall application, follow the [instructions in the
-app](https://github.com/alphagov/whitehall#getting-search-running-locally).
 
 ## Adding a new index
 
-To add a new index to Rummager, you'll first need to add it to the list of index
-names Rummager knows about in [`elasticsearch.yml`](elasticsearch.yml). For
-instance, you might change it to:
+To add a new index to Rummager, you'll first need to add it to the list of index names Rummager knows about in [`elasticsearch.yml`](elasticsearch.yml). For instance, you might change it to:
 
-    index_names: ["mainstream", "detailed", "government", "my_new_index"]
+    index_names: ["dapaas", "odi", "my_new_index"]
 
 To create the index, you'll need to run:
 
@@ -98,6 +53,11 @@ you'll either need to delete your existing index or, if you want to keep its
 contents, run:
 
     RUMMAGER_INDEX=my_new_index bundle exec rake rummager:migrate_from_unaliased_index
+
+
+## Once ODI search is LIVE
+
+The below Health check will need updating with relevant data for ODI and then you can have some "objective" metrics for search.
 
 ## Health check
 

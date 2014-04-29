@@ -13,7 +13,7 @@ class MultipleBackendsTest < IntegrationTest
 
   def test_actions_other_than_search_use_primary_backend_as_default
     default_index = mock("default index", get: { 'example' => 'document' })
-    Elasticsearch::SearchServer.any_instance.expects(:index).with("mainstream").returns(default_index)
+    Elasticsearch::SearchServer.any_instance.expects(:index).with("dapaas").returns(default_index)
     get "/documents/abc"
   end
 

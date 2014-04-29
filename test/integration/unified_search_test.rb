@@ -48,8 +48,8 @@ class UnifiedSearchTest < MultiIndexTest
   def test_only_contains_fields_which_are_present
     get "/unified_search?q=important&order=public_timestamp"
     results = parsed_response["results"]
-    refute_includes results[0].keys, "topics"
-    assert_equal ["farming"], results[1]["topics"]
+    refute_includes results[0].keys, "topic"
+    assert_equal ["2"], results[1]["section"]
   end
 
   def test_facet_counting

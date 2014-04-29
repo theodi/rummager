@@ -20,6 +20,7 @@ class MultiIndexTest < IntegrationTest
       end
       add_field_to_mappings("topics")
       add_field_to_mappings("section")
+      add_field_to_mappings("format")
       create_test_index(index_name)
       add_sample_documents(index_name, 2)
       commit_index(index_name)

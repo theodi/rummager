@@ -1,6 +1,8 @@
 source "https://rubygems.org"
 source "https://BnrJb6FZyzspBboNJzYZ@gem.fury.io/govuk/"
 
+gem "thin"
+gem "foreman"
 gem "unicorn", "4.6.2"
 gem "raindrops", "0.11.0"
 gem "sinatra", "1.3.4"
@@ -21,7 +23,7 @@ gem "sidekiq", "2.13.0"
 gem "redis-namespace", "1.3.1"
 gem "newrelic_rpm", "3.6.7.152"
 gem "plek", "1.5.0"
-gem "gds-api-adapters", "7.18.0"
+gem "gds-api-adapters", :github => 'theodi/gds-api-adapters'
 gem "rack-logstasher", "0.0.3"
 gem "unf", "0.1.3"
 
