@@ -8,9 +8,11 @@ after_success:
   curl -v -X POST -d ''{"ref":"refs/tags/CURRENT","sha":"''$TRAVIS_COMMIT''"}''  --header
   "Content-Type:application/json" -u $GITHUB_USER:$GITHUB_PASSWORD "https://api.github.com/repos/$TRAVIS_REPO_SLUG/git/refs"'
 services:
-  - elasticsearch-0.20.0
   - redis-server
 before_install:
+  - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.6.deb
+  - sudo dpkg -i elasticsearch-0.20.6.deb
+  - bin/elasticsearch -d
   - sudo apt-get update -qq
   - sudo apt-get install -qq aspell aspell-en libaspell-dev
 branches:
