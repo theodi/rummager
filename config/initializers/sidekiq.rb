@@ -8,9 +8,15 @@ else
 end
 
 redis_config = {
-  :url => "redis://localhost:6379/0",
   :namespace => namespace
 }
+if ENV['QUIRKAFLEEG_RUMMAGER_REDIS_HOST']
+  redis_config[:host] = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_HOST']
+  redis_config[:password] = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_PASSWORD']
+else
+  redis_config[:url] = "redis://localhost:6379/0"
+end
+
 
 Sidekiq.configure_server do |config|
   config.redis = redis_config
