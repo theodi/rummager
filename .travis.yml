@@ -8,12 +8,12 @@ after_success:
   curl -v -X POST -d ''{"ref":"refs/tags/CURRENT","sha":"''$TRAVIS_COMMIT''"}''  --header
   "Content-Type:application/json" -u $GITHUB_USER:$GITHUB_PASSWORD "https://api.github.com/repos/$TRAVIS_REPO_SLUG/git/refs"'
 services:
-  - redis-server
+- redis-server
 before_install:
-  - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.6.deb
-  - sudo dpkg -i elasticsearch-0.20.6.deb
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq aspell aspell-en libaspell-dev
+- wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.6.deb
+- sudo dpkg -i elasticsearch-0.20.6.deb
+- sudo apt-get update -qq
+- sudo apt-get install -qq aspell aspell-en libaspell-dev
 branches:
   except:
   - CURRENT
@@ -49,3 +49,5 @@ env:
   - secure: FzgHoKGs78TVbWGaIjBpZ+c1ki0cNrNjJOCu4w9abt83z7tnGRIOdV5+CN334JiTtuIUsQYvgL1kvZQY1QUISS6gdYz4B2j96Yc7smoxlETZkW9emEzl+YYvWFkniwaZwDg6mhBS4QwtGjIrwejvZN3GEeAKatK8IY/1AClQGCE=
   - secure: BP54SgVFrUQruWEx3fTHJruh5rzO6NTeytaE0JGj8Y3g1gxENebb0/NtJJa8neCVrGSeMkfUWDAW152PDlecKRAJ1woT1fEr+XHEi4ZZ+lL3IkJlY98fw0RkIAffQpRuxyB8nFRgqBumNLiKxQuyW2AKLVOtGGP2pIyN/NgKmYo=
   - secure: Pi6vvNF0ZDIOjoC1gpDxbwpHXxYXYAoykACW3aRcvEHVHLH1aRP7ig65ie7zD6vW3h+hYIUCwZPPqzGX/yYNyydNl0qX28+7AvwyOI0ZbiQqUXxmv8ogAg1mxLRgPbB1XOqRxo4uDBHwhWd9xz/HkmbrGzkj6evSms/b2vBYyvM=
+  - secure: Tf0wil4Gx4e00gV2G300h8UfKnBC+D3BextrYiGNHXaydjNsl6fBh85MVa3hfISJHEuE+uKYWwiJpMqRudibLfbssAn/YysymY5vayOdr8ayJUdjmJAkzZt8GJrOM1IG2E6BAeCFETDGnRH1d3We3GnikqdpP7u16/7saYJULPc=
+  - secure: R5LsgTYEsweOSqArgVpYYJ35yzT2Enon6SXAM8QfxqFci8hjB3sDabT+Jf5ca/mfDmzl5YEBmedYzdLhyZd5ifNmO//n7LsrZ2KmE0uUiFufvRH02eDlOYfoOOUqFv2HZdEquD1i0w53854mz0CUZK+TJbF427ojmQTLn3NqGxI=
