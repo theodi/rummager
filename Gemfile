@@ -5,7 +5,7 @@ source "https://rubygems.org"
 source "https://BnrJb6FZyzspBboNJzYZ@gem.fury.io/govuk/"
 
 gem "thin"
-gem "foreman", "< 0.67.0"
+gem "foreman", "< 0.65.0"
 gem "unicorn", "4.6.2"
 gem "raindrops", "0.11.0"
 gem "sinatra", "1.3.4"
