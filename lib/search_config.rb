@@ -1,11 +1,14 @@
 require "yaml"
 require "elasticsearch/search_server"
+require "dotenv"
+
+Dotenv.load
 
 class SearchConfig
 
   def search_server
     Elasticsearch::SearchServer.new(
-      elasticsearch["base_uri"],
+      ENV['QUIRKAFLEEG_ELASTICSEARCH_LOCATION'] || elasticsearch["base_uri"],
       elasticsearch_schema,
       index_names
     )
