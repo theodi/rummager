@@ -10,9 +10,8 @@ end
 redis_config = {
   :namespace => namespace
 }
-if ENV['QUIRKAFLEEG_RUMMAGER_REDIS_HOST']
-  redis_config[:host] = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_HOST']
-  redis_config[:password] = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_PASSWORD']
+if ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
+  redis_config[:url] = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
 else
   redis_config[:url] = "redis://localhost:6379/0"
 end
