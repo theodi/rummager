@@ -13,7 +13,7 @@ redis_config = {
 if ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
   redis_config[:url] = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
 else
-  redis_config[:url] = "redis://localhost:6379/43"
+  redis_config[:url] = "redis://localhost:6379/0"
 end
 
 
