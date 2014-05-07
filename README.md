@@ -1,6 +1,6 @@
 # Rummager
 
-Rummager is now primarily based on elasticsearch.
+Rummager is now primarily based on elasticsearch. 
 
 ## Get started
 
@@ -22,13 +22,13 @@ development, you need to run both of these commands:
 
 ## Indexing content
 
-You will need Panopticon and Rummager running. 
+You will need Panopticon and Rummager running.
 
 To build an index from scratch you will need to be in Publisher repo and run:
 
   bundle exec rake panopticon:register
 
-This will loop through each published edition and create a RegisterableEdition which will call Panopticon to update it's artefact with. 
+This will loop through each published edition and create a RegisterableEdition which will call Panopticon to update it's artefact with.
 
 Remember: the on save observer in panopticon is what fires off the submit to Elasticsearch.
 
