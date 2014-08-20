@@ -1,6 +1,6 @@
 # Rummager
 
-Rummager is now primarily based on elasticsearch.
+Rummager is now primarily based on elasticsearch.  
 
 ## Get started
 
