@@ -1,3 +1,5 @@
+require "search_config"
+
 class SearchParameterParser
 
   attr_reader :parsed_params
@@ -62,6 +64,7 @@ private
       return_fields: return_fields,
       filters: filters,
       facets: facets,
+      index: index
     }
 
     unused_params = @params.keys - @used_params
@@ -88,6 +91,21 @@ private
       return nil
     end
     return [field, dir]
+  end
+
+  def index
+    index = string_param("index")
+    allowed_index_fields = SearchConfig.new.govuk_index_names
+
+    if index.nil?
+      return allowed_index_fields.join(",")
+    end
+
+    unless allowed_index_fields.include?(index)
+      @errors << "#{index} is not a valid index"
+    end
+
+    return index
   end
 
   # Get a list of the fields to request in results from elasticsearch
