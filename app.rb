@@ -70,10 +70,6 @@ class Rummager < Sinatra::Application
     end
   end
 
-  def unified_index
-    search_server.index(settings.search_config.govuk_index_names.join(","))
-  end
-
   def lines_from_a_file(filepath)
     path = File.expand_path(filepath, File.dirname(__FILE__))
     lines = File.open(path).map(&:chomp)
@@ -290,7 +286,10 @@ class Rummager < Sinatra::Application
         error: parser.error,
       })
     end
-    searcher = UnifiedSearcher.new(unified_index, registries, registry_by_field)
+
+    index = search_server.index(parser.parsed_params[:index])
+
+    searcher = UnifiedSearcher.new(index, registries, registry_by_field)
     MultiJson.encode searcher.search(parser.parsed_params)
   end
 

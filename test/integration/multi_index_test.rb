@@ -11,6 +11,7 @@ class MultiIndexTest < IntegrationTest
   def setup
     stub_elasticsearch_settings(INDEX_NAMES)
     app.settings.search_config.stubs(:govuk_index_names).returns(INDEX_NAMES)
+    SearchConfig.any_instance.stubs(:govuk_index_names).returns(INDEX_NAMES)
     enable_test_index_connections
 
     INDEX_NAMES.each do |index_name|

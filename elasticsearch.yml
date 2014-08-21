@@ -1,5 +1,5 @@
 base_uri: "http://localhost:9200"
-index_names: ["dapaas"]
+index_names: ["dapaas", "odi"]
 
 # ODI: these can all be ignored
 organisation_registry_index: "government"
@@ -8,4 +8,4 @@ document_series_registry_index: "government"
 document_collection_registry_index: "government"
 world_location_registry_index: "government"
 # These indices are passed in this order to GovukSearcher
-govuk_index_names: ["dapaas"]
+govuk_index_names: ["dapaas", "odi"]

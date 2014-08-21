@@ -19,6 +19,16 @@ class UnifiedSearchTest < MultiIndexTest
     assert links.include? "/mainstream-1"
   end
 
+  def test_filters_by_index
+    get "/unified_search?q=important&index=mainstream_test"
+    links = parsed_response["results"].map do |result|
+      result["link"]
+    end
+    refute links.include? "/detailed-1"
+    refute links.include? "/government-1"
+    assert links.include? "/mainstream-1"
+  end
+
   def test_sort_by_date_ascending
     get "/unified_search?q=important&order=public_timestamp"
     links = parsed_response["results"].map do |result|

@@ -12,6 +12,7 @@ class SearchParameterParserTest < ShouldaUnitTestCase
       return_fields: SearchParameterParser::ALLOWED_RETURN_FIELDS,
       filters: {},
       facets: {},
+      index: "dapaas,odi"
     }.merge(params)
   end
 
@@ -198,6 +199,21 @@ class SearchParameterParserTest < ShouldaUnitTestCase
     assert_equal("Some requested fields are not valid return fields: [\"waffle\"]", p.error)
     assert !p.valid?
     assert_equal(expected_params({return_fields: ["title"]}), p.parsed_params)
+  end
+
+  should "return a single index" do
+    p = SearchParameterParser.new({"index" => "odi"})
+
+    assert_equal("", p.error)
+    assert p.valid?
+    assert_equal(expected_params({index: "odi"}), p.parsed_params)
+  end
+
+  should "complain about invalid indexes" do
+    p = SearchParameterParser.new({"index" => "foobar"})
+
+    assert_equal("foobar is not a valid index", p.error)
+    assert !p.valid?
   end
 
 end
