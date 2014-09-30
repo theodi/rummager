@@ -12,6 +12,9 @@ if defined?(Raindrops)
 end
 
 require "env"
+require "dotenv"
+
+Dotenv.load
 
 require "bundler"
 Bundler.require(:default, ENV['RACK_ENV'])

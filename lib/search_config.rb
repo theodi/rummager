@@ -1,8 +1,5 @@
 require "yaml"
 require "elasticsearch/search_server"
-require "dotenv"
-
-Dotenv.load
 
 class SearchConfig
 
