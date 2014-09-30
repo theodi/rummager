@@ -29,6 +29,7 @@ gem "plek", "1.5.0"
 gem "gds-api-adapters", :github => 'theodi/gds-api-adapters'
 gem "rack-logstasher", "0.0.3"
 gem "unf", "0.1.3"
+gem "airbrake"
 
 group :test do
   gem "shoulda-context"
