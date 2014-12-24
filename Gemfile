@@ -23,6 +23,7 @@ gem 'ffi-aspell', "0.0.3"
 gem "slop", "3.4.5"
 gem "sidekiq", "2.13.0"
 # pin to version that includes security vulnerability fix
+gem "activesupport", "~> 3.2"
 gem "redis-namespace", "1.3.1"
 gem "newrelic_rpm", "3.6.7.152"
 gem "plek", "1.5.0"
