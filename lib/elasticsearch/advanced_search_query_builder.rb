@@ -85,7 +85,7 @@ module Elasticsearch
       if @keywords
         {
           query: {
-            custom_filters_score: {
+            function_score: {
               query: {
                 bool: {
                   should: [
@@ -100,15 +100,20 @@ module Elasticsearch
                     {
                       query_string: {
                         query: escape(@keywords),
-                        analyzer: "query_default"
+                        analyzer: "query_with_old_synonyms"
                       }
                     }
                   ]
                 }
               },
-              filters: [
+              functions: [
                 filter: { term: { search_format_types: "edition" } },
-                script: "((0.15 / ((3.1*pow(10,-11)) * abs(time() - doc['public_timestamp'].date.getMillis()) + 0.05)) + 0.5)"
+                script_score: {
+                  script: "((0.15 / ((3.1*pow(10,-11)) * abs(now - doc['public_timestamp'].date.getMillis()) + 0.05)) + 0.5)",
+                  params: {
+                    now: time_in_millis_to_nearest_minute
+                  },
+                }
               ]
             }
           }
@@ -116,6 +121,10 @@ module Elasticsearch
       else
         {"query" => {"match_all" => {}}}
       end
+    end
+
+    def time_in_millis_to_nearest_minute
+      (Time.now.to_i / 60) * 60000
     end
 
     def filter_query_hash

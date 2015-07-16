@@ -4,82 +4,9 @@ require "result_set_presenter"
 
 class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
-  FIELDS = %w(link title description format organisations topics document_series document_collections world_locations)
+  FIELDS = %w(link title description format organisations topics document_series document_collections world_locations specialist_sectors people)
 
-  def result_set
-    documents = [
-      {
-        "link" => "/foo",
-        "title" => "Foo",
-        "description" => "Full of foo.",
-        "format" => "edition"
-      }
-    ].map { |h| Document.new(FIELDS, h) }
-
-    stub("result set", results: documents, total: 1)
-  end
-
-  def single_result_with_format(format)
-    stub(results: [Document.new(FIELDS, :format => format)], total: 1)
-  end
-
-  def single_result_with_document_series(*document_series_slugs)
-    document_hash = {
-        "link" => "/foo",
-        "title" => "Foo",
-        "description" => "Full of foo.",
-        "format" => "edition",
-        "document_series" => document_series_slugs
-      }
-
-    stub(results: [Document.new(FIELDS, document_hash)], total: 1)
-  end
-
-  def single_result_with_document_collection(*document_collection_slugs)
-    document_hash = {
-        "link" => "/foo",
-        "title" => "Foo",
-        "description" => "Full of foo.",
-        "format" => "edition",
-        "document_collections" => document_collection_slugs
-      }
-
-    stub(results: [Document.new(FIELDS, document_hash)], total: 1)
-  end
-
-  def single_result_with_organisations(*organisation_slugs)
-    document_hash = {
-        "link" => "/foo",
-        "title" => "Foo",
-        "description" => "Full of foo.",
-        "format" => "edition",
-        "organisations" => organisation_slugs
-      }
-
-    stub(results: [Document.new(FIELDS, document_hash)], total: 1)
-  end
-
-  def single_result_with_topics(*topic_slugs)
-    document_hash = {
-      "link" => "/foo",
-      "title" => "Foo",
-      "description" => "Full of foo.",
-      "format" => "edition",
-      "topics" => topic_slugs
-    }
-    stub(results: [Document.new(FIELDS, document_hash)], total: 1)
-  end
-
-  def single_result_with_world_locations(*world_location_slugs)
-    document_hash = {
-      "link" => "/foo",
-      "title" => "Foo",
-      "description" => "Full of foo.",
-      "format" => "edition",
-      "world_locations" => world_location_slugs
-    }
-    stub(results: [Document.new(FIELDS, document_hash)], total: 1)
-  end
+  # Tests
 
   def test_generates_json_from_documents
     presenter = ResultSetPresenter.new(result_set)
@@ -91,7 +18,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
   def test_expands_document_series
     rail_statistics_document = Document.new(
-      %w(link title),
+      sample_field_definitions(%w(link title)),
       link: "/government/organisations/department-for-transport/series/rail-statistics",
       title: "Rail statistics"
     )
@@ -102,7 +29,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
     presenter = ResultSetPresenter.new(
       single_result_with_document_series("rail-statistics"),
-      document_series_registry: document_series_registry
+      document_series: document_series_registry
     )
 
     output = presenter.present
@@ -116,7 +43,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
   def test_expands_document_collection
     rail_statistics_document = Document.new(
-      %w(link title),
+      sample_field_definitions(%w(link title)),
       link: "/government/collections/rail-statistics",
       title: "Rail statistics"
     )
@@ -127,7 +54,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
     presenter = ResultSetPresenter.new(
       single_result_with_document_collection("rail-statistics"),
-      document_collection_registry: document_collection_registry
+      document_collections: document_collection_registry
     )
 
     output = presenter.present
@@ -141,7 +68,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
   def test_expands_organisations
     mod_document = Document.new(
-      %w(link title),
+      sample_field_definitions(%w(link title)),
       link: "/government/organisations/ministry-of-defence",
       title: "Ministry of Defence (MoD)"
     )
@@ -152,7 +79,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
     presenter = ResultSetPresenter.new(
       single_result_with_organisations("ministry-of-defence"),
-      organisation_registry: organisation_registry
+      organisations: organisation_registry
     )
 
     output = presenter.present
@@ -165,7 +92,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
   def test_expands_topics
     housing_document = Document.new(
-      %w(link title),
+      sample_field_definitions(%w(link title)),
       link: "/government/topics/housing",
       title: "Housing"
     )
@@ -176,7 +103,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
     presenter = ResultSetPresenter.new(
       single_result_with_topics("housing"),
-      topic_registry: topic_registry
+      topics: topic_registry
     )
 
     output = presenter.present
@@ -189,7 +116,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
   def test_expands_world_locations
     angola_world_location = Document.new(
-      %w(link title),
+      sample_field_definitions(%w(link title)),
       link: "/government/world/angola",
       title: "Angola"
     )
@@ -200,7 +127,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
     presenter = ResultSetPresenter.new(
       single_result_with_world_locations("angola"),
-      world_location_registry: world_location_registry
+      world_locations: world_location_registry
     )
 
     output = presenter.present
@@ -211,6 +138,54 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
     assert_equal "angola", output["results"][0]["world_locations"][0]["slug"]
   end
 
+  def test_expands_sectors
+    oil_gas_sector_fields = {
+      "link" => "/topic/oil-and-gas/licensing",
+      "title" => "Licensing",
+      "slug" => "oil-and-gas/licensing",
+    }
+    specialist_sector_registry = stub("sector registry")
+    specialist_sector_registry.expects(:[])
+      .with("oil-and-gas/licensing")
+      .returns(oil_gas_sector_fields)
+
+    presenter = ResultSetPresenter.new(
+      single_result_with_sectors("oil-and-gas/licensing"),
+      specialist_sectors: specialist_sector_registry,
+    )
+
+    output = presenter.present
+    assert_equal 1, output["results"][0]["specialist_sectors"].size
+    assert_instance_of Hash, output["results"][0]["specialist_sectors"][0]
+    assert_equal "Licensing", output["results"][0]["specialist_sectors"][0]["title"]
+    assert_equal "/topic/oil-and-gas/licensing", output["results"][0]["specialist_sectors"][0]["link"]
+    assert_equal "oil-and-gas/licensing", output["results"][0]["specialist_sectors"][0]["slug"]
+  end
+
+  def test_expands_people
+    people_document = Document.new(
+      sample_field_definitions(%w(link title)),
+      link: "/government/people/example-people",
+      title: "Example People"
+    )
+    people_registry = stub("people registry")
+    people_registry.expects(:[])
+      .with("example-people")
+      .returns(people_document)
+
+    presenter = ResultSetPresenter.new(
+      single_result_with_people("example-people"),
+      people: people_registry
+    )
+
+    output = presenter.present
+    assert_equal 1, output["results"][0]["people"].size
+    assert_instance_of Hash, output["results"][0]["people"][0]
+    assert_equal "Example People", output["results"][0]["people"][0]["title"]
+    assert_equal "/government/people/example-people", output["results"][0]["people"][0]["link"]
+    assert_equal "example-people", output["results"][0]["people"][0]["slug"]
+  end
+
   def test_unknown_organisations_just_have_slug
     organisation_registry = stub("organisation registry")
     organisation_registry.expects(:[])
@@ -218,7 +193,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
 
     presenter = ResultSetPresenter.new(
       single_result_with_organisations("ministry-of-silly-walks"),
-      organisation_registry: organisation_registry
+      organisations: organisation_registry
     )
 
     output = presenter.present
@@ -232,7 +207,7 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
   def test_organisations_not_modified_if_no_registry_available
     presenter = ResultSetPresenter.new(
       single_result_with_organisations("ministry-of-silly-walks"),
-      organisation_registry: nil
+      organisations: nil
     )
 
     output = presenter.present
@@ -240,26 +215,102 @@ class ResultSetPresenterTest < MiniTest::Unit::TestCase
     assert_equal "ministry-of-silly-walks", output["results"][0]["organisations"][0]
   end
 
-  def test_includes_spelling_suggestions
-    presenter = ResultSetPresenter.new(
-      result_set,
-      spelling_suggestions: ["spelling can be improved"]
-    )
+  private
 
-    output = presenter.present
-    expected = [
-      "spelling can be improved"
-    ]
-    assert_equal expected, output["spelling_suggestions"]
+  def result_set
+    documents = [
+      {
+        "link" => "/foo",
+        "title" => "Foo",
+        "description" => "Full of foo.",
+        "format" => "edition"
+      }
+    ].map { |h| Document.new(sample_field_definitions(FIELDS), h) }
+
+    stub("result set", results: documents, total: 1)
   end
 
-  def test_excludes_spelling_suggestions_when_not_supplied
-    presenter = ResultSetPresenter.new(
-      result_set,
-      spelling_suggestions: nil # nil, not empty array
-    )
+  def single_result_with_format(format)
+    stub(results: [Document.new(sample_field_definitions(FIELDS), :format => format)], total: 1)
+  end
 
-    output = presenter.present
-    assert_equal ["total", "results"], output.keys
+  def single_result_with_document_series(*document_series_slugs)
+    document_hash = {
+        "link" => "/foo",
+        "title" => "Foo",
+        "description" => "Full of foo.",
+        "format" => "edition",
+        "document_series" => document_series_slugs
+      }
+
+    stub(results: [Document.new(sample_field_definitions(FIELDS), document_hash)], total: 1)
+  end
+
+  def single_result_with_document_collection(*document_collection_slugs)
+    document_hash = {
+        "link" => "/foo",
+        "title" => "Foo",
+        "description" => "Full of foo.",
+        "format" => "edition",
+        "document_collections" => document_collection_slugs
+      }
+
+    stub(results: [Document.new(sample_field_definitions(FIELDS), document_hash)], total: 1)
+  end
+
+  def single_result_with_organisations(*organisation_slugs)
+    document_hash = {
+        "link" => "/foo",
+        "title" => "Foo",
+        "description" => "Full of foo.",
+        "format" => "edition",
+        "organisations" => organisation_slugs
+      }
+
+    stub(results: [Document.new(sample_field_definitions(FIELDS), document_hash)], total: 1)
+  end
+
+  def single_result_with_topics(*topic_slugs)
+    document_hash = {
+      "link" => "/foo",
+      "title" => "Foo",
+      "description" => "Full of foo.",
+      "format" => "edition",
+      "topics" => topic_slugs
+    }
+    stub(results: [Document.new(sample_field_definitions(FIELDS), document_hash)], total: 1)
+  end
+
+  def single_result_with_world_locations(*world_location_slugs)
+    document_hash = {
+      "link" => "/foo",
+      "title" => "Foo",
+      "description" => "Full of foo.",
+      "format" => "edition",
+      "world_locations" => world_location_slugs
+    }
+    stub(results: [Document.new(sample_field_definitions(FIELDS), document_hash)], total: 1)
+  end
+
+  def single_result_with_sectors(*sector_slugs)
+    document_hash = {
+      "link" => "/foo",
+      "title" => "Foo",
+      "description" => "Full of foo.",
+      "format" => "edition",
+      "specialist_sectors" => sector_slugs,
+    }
+    stub(results: [Document.new(sample_field_definitions(FIELDS), document_hash)], total: 1)
+  end
+
+  def single_result_with_people(*people_slugs)
+    document_hash = {
+      "link" => "/foo",
+      "title" => "Foo",
+      "description" => "Full of foo.",
+      "format" => "edition",
+      "people" => people_slugs,
+    }
+    stub(results: [Document.new(sample_field_definitions(FIELDS), document_hash)], total: 1)
   end
 end

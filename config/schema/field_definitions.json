@@ -1,0 +1,403 @@
+{
+  "all_searchable_text": {
+    "description": "Special field which searchable text is copied into; similar to the standard `_all` field, but more customisable",
+    "type": "all_searchable_text_type"
+  },
+
+  "format": {
+    "type": "identifier"
+  },
+
+  "title": {
+    "type": "searchable_sortable_text"
+  },
+
+  "description": {
+    "type": "searchable_text"
+  },
+
+  "link": {
+    "description": "The link to the document.  This is usually the path component of the URL of the document, including a leading slash, but sometimes omits the leading slash, and is sometimes an absolute URL of related content which does not appear on GOV.UK",
+    "type": "identifier"
+  },
+
+  "indexable_content": {
+    "type": "searchable_text"
+  },
+
+  "popularity": {
+    "type": "float"
+  },
+
+  "organisations": {
+    "type": "identifiers"
+  },
+
+  "specialist_sectors": {
+    "description": "The navigation \"topics\" that the document is assigned to.  Nothing to do with \"policy areas\"",
+    "type": "identifiers"
+  },
+
+  "policies": {
+    "type": "identifiers"
+  },
+
+  "mainstream_browse_pages": {
+    "type": "identifiers"
+  },
+
+  "tags": {
+    "type": "identifiers"
+  },
+
+  "updated_at": {
+    "type": "date"
+  },
+
+  "last_update": {
+    "type": "date"
+  },
+
+  "public_timestamp": {
+    "type": "date"
+  },
+
+  "latest_change_note": {
+    "type": "unsearchable_text"
+  },
+
+  "section": {
+    "type": "identifier"
+  },
+
+  "subsection": {
+    "type": "identifier"
+  },
+
+  "subsubsection": {
+    "type": "identifier"
+  },
+
+  "id": {
+    "type": "identifier"
+  },
+
+  "acronym": {
+    "type": "searchable_text"
+  },
+
+  "attachments": {
+    "type": "objects",
+    "children": {
+      "content": { "type": "searchable_text" },
+      "title": { "type": "searchable_text" },
+      "isbn": { "type": "searchable_identifier" },
+      "unique_reference": { "type": "searchable_identifier" },
+      "command_paper_number": { "type": "searchable_identifier" },
+      "hoc_paper_number": { "type": "searchable_identifier" }
+    }
+  },
+
+  "detailed_format": {
+    "description": "A slugified version of the display_type field",
+    "type": "identifier"
+  },
+
+  "display_type": {
+    "type": "identifier"
+  },
+
+  "document_collections": {
+    "type": "identifiers"
+  },
+
+  "document_series": {
+    "type": "identifiers"
+  },
+
+  "release_timestamp": {
+    "type": "date"
+  },
+
+  "metadata": {
+    "description": "The \"metadata\" field is intended for the storage of additional non-searchable document data. This allows additional information to be stored and displayed in search results without having to make changes to the schema.",
+    "type": "opaque_object"
+  },
+
+  "operational_field": {
+    "type": "identifier"
+  },
+
+  "organisation_state": {
+    "type": "identifier"
+  },
+
+  "organisation_type": {
+    "type": "identifier"
+  },
+
+  "people": {
+    "type": "identifiers"
+  },
+
+  "policy_groups": {
+    "type": "identifiers"
+  },
+
+  "relevant_to_local_government": {
+    "type": "boolean"
+  },
+
+  "search_format_types": {
+    "type": "identifiers"
+  },
+
+  "slug": {
+    "type": "identifier"
+  },
+
+  "statistics_announcement_state": {
+    "type": "identifier"
+  },
+
+  "topics": {
+    "description": "The policy areas that the document is associated with.  Nothing to do with \"specialist sectors\"",
+    "type": "identifiers"
+  },
+
+  "world_locations": {
+    "type": "identifiers"
+  },
+
+  "has_official_document": {
+    "type": "boolean"
+  },
+
+  "has_command_paper": {
+    "type": "boolean"
+  },
+
+  "has_act_paper": {
+    "type": "boolean"
+  },
+
+  "aircraft_category": {
+    "type": "identifiers"
+  },
+
+  "report_type": {
+    "type": "identifiers"
+  },
+
+  "date_of_occurrence": {
+    "type": "date"
+  },
+
+  "registration": {
+    "type": "searchable_text"
+  },
+
+  "aircraft_type": {
+    "type": "searchable_text"
+  },
+
+  "location": {
+    "type": "identifiers"
+  },
+
+  "case_type": {
+    "type": "identifiers"
+  },
+
+  "case_state": {
+    "type": "identifiers"
+  },
+
+  "market_sector": {
+    "type": "identifiers"
+  },
+
+  "outcome_type": {
+    "type": "identifier"
+  },
+
+  "opened_date": {
+    "type": "date"
+  },
+
+  "closed_date": {
+    "type": "date"
+  },
+
+  "contact_group": {
+    "type": "identifier"
+  },
+
+  "grant_type": {
+    "type": "identifiers"
+  },
+
+  "land_use": {
+    "type": "identifiers"
+  },
+
+  "tiers_or_standalone_items": {
+    "type": "identifiers"
+  },
+
+  "funding_amount": {
+    "description": "Funding (per unit per year)",
+    "type": "identifiers"
+  },
+
+  "therapeutic_area": {
+    "type": "identifiers"
+  },
+
+  "first_published_at": {
+    "type": "date"
+  },
+
+  "fund_state": {
+    "type": "identifiers"
+  },
+
+  "fund_type": {
+    "type": "identifiers"
+  },
+
+  "funding_source": {
+    "type": "identifiers"
+  },
+
+  "closing_date": {
+    "type": "date"
+  },
+
+  "manual": {
+    "type": "identifier"
+  },
+
+  "hmrc_manual_section_id": {
+    "type": "identifier"
+  },
+
+  "development_sector": {
+    "type": "identifiers"
+  },
+
+  "eligible_entities": {
+    "type": "identifiers"
+  },
+
+  "value_of_funding": {
+    "type": "identifiers"
+  },
+
+  "vessel_type": {
+    "type": "identifiers"
+  },
+
+  "alert_type": {
+    "type": "identifiers"
+  },
+
+  "medical_specialism": {
+    "type": "identifiers"
+  },
+
+  "issued_date": {
+    "type": "date"
+  },
+
+  "railway_type": {
+    "type": "identifiers"
+  },
+
+  "is_political": {
+    "description": "If the content is considered political in nature, reflecting views of the government it was published under",
+    "type": "boolean"
+  },
+
+  "is_historic": {
+    "description": "If the content is political and published by a previous government, it is considered historic and not reflecting of the current government",
+    "type": "boolean"
+  },
+
+  "government_name": {
+    "description": "The name of the Government that first published this document, eg, '1970 to 1974 Conservative government'",
+    "type": "unsearchable_text"
+  },
+
+  "exact_query": {
+    "description": "Field used in the best-bet implementation to perform an exact match between a user's query and a stored best-bet",
+    "type": "best_bet_exact_match_text"
+  },
+
+  "stemmed_query": {
+    "description": "Field used in the best-bet implementation to perform a stemmed match between a user's query and a stored best-bet",
+    "type": "best_bet_stemmed_match_text"
+  },
+
+  "stemmed_query_as_term": {
+    "description": "Field used in the best-bet implementation to hold the raw form of a stemmed query",
+    "type": "identifier"
+  },
+
+  "details": {
+    "description": "Field used in the best-bet implementation to store the modifications to be made to the query when a best-bet is matched",
+     "type": "unsearchable_text"
+  },
+
+  "path_components": {
+    "description": "Field used in the page-traffic index to hold the full paths of each component of a url.  eg: a document with a path of '/foo/bar/baz' would have the values '/foo', '/foo/bar' and '/foo/bar/baz' in this field.  This allows all the pages under a given URL component to be identified.",
+    "type": "identifiers"
+  },
+
+  "rank_14": {
+    "description": "Field used in the page-traffic index to hold the rank of this page in the list of pages on the website when ordered by traffic.  This is a fairly stable value used in ranking calculations.",
+    "type": "float"
+  },
+
+  "fault_type": {
+    "type": "identifiers"
+  },
+
+  "faulty_item_type": {
+    "type": "identifiers"
+  },
+
+  "manufacturer": {
+    "type": "identifiers"
+  },
+
+  "serial_number": {
+    "type": "identifiers"
+  },
+
+  "faulty_item_model": {
+    "type": "identifiers"
+  },
+
+  "alert_issue_date": {
+    "type": "date"
+  },
+
+  "build_start_date": {
+    "type": "date"
+  },
+
+  "build_end_date": {
+    "type": "date"
+  },
+
+  "spelling_text": {
+    "description": "Generated field, populated with the same content as sent to the _all field, but tokenised into words, lowercased and shingled, not stemmed, etc",
+    "type": "spelling_text"
+  },
+
+  "important_to_policy": {
+    "description": "A flag set by editors to mark a document as being important to policy",
+    "type": "boolean"
+  }
+}

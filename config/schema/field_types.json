@@ -1,0 +1,222 @@
+{
+  "identifier": {
+    "description": "An identifier, can be used for exact (case and whitespace sensitive) lookup and facetting",
+    "filter_type": "text",
+    "es_config": {
+      "type": "string",
+      "index": "not_analyzed",
+      "include_in_all": false
+    }
+  },
+
+  "identifiers": {
+    "description": "Like identifier, but can occur multiple times in a single document",
+    "filter_type": "text",
+    "multivalued": true,
+    "es_config": {
+      "type": "string",
+      "index": "not_analyzed",
+      "include_in_all": false
+    }
+  },
+
+  "searchable_identifier": {
+    "description": "Like an identifier, but should also be considered in non-field-specific text searches",
+    "filter_type": "text",
+    "es_config": {
+      "type": "string",
+      "index": "not_analyzed",
+      "include_in_all": true,
+      "copy_to": ["spelling_text", "all_searchable_text"]
+    }
+  },
+
+  "searchable_text": {
+    "description": "A piece of plain text that should be split into words and considered in searches",
+    "es_config": {
+      "type": "string",
+      "index": "analyzed",
+      "include_in_all": true,
+      "copy_to": ["spelling_text", "all_searchable_text"],
+      "fields": {
+        "no_stop": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "analyzer": "searchable_text"
+        },
+        "shingles": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "analyzer": "with_shingles"
+        },
+        "synonym": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "index_analyzer": "with_index_synonyms",
+          "search_analyzer": "with_search_synonyms"
+        },
+        "id_codes": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "analyzer": "with_id_codes"
+        }
+      }
+    }
+  },
+
+  "all_searchable_text_type": {
+    "description": "A type for a special single field that all searchable text is copied into (using `copy_to` directives in elasticsearch). We use this instead of the built-in `_all` so that we can analyze it in multiple ways",
+    "es_config": {
+      "type": "string",
+      "index": "analyzed",
+      "analyzer": "searchable_text",
+      "include_in_all": false,
+      "fields": {
+        "synonym": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "index_analyzer": "with_index_synonyms",
+          "search_analyzer": "with_search_synonyms"
+        },
+        "id_codes": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "analyzer": "with_id_codes"
+        }
+      }
+    }
+  },
+
+  "searchable_sortable_text": {
+    "description": "A piece of plain text that should be split into words and considered in searches, but can also be sorted on",
+    "es_config": {
+      "type": "string",
+      "index": "analyzed",
+      "include_in_all": true,
+      "copy_to": ["spelling_text"],
+      "fields": {
+        "sort": {
+          "type": "string",
+          "index": "analyzed",
+          "analyzer": "string_for_sorting",
+          "include_in_all": false
+        },
+        "no_stop": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "analyzer": "searchable_text"
+        },
+        "shingles": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "analyzer": "with_shingles"
+        },
+        "synonym": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "index_analyzer": "with_index_synonyms",
+          "search_analyzer": "with_search_synonyms"
+        },
+        "id_codes": {
+          "type": "string",
+          "index": "analyzed",
+          "include_in_all": false,
+          "analyzer": "with_id_codes"
+        }
+      }
+    }
+  },
+
+  "unsearchable_text": {
+    "description": "A piece of text which can be returned, but which is not searchable",
+    "es_config": {
+      "type": "string",
+      "index": "no",
+      "include_in_all": false
+    }
+  },
+
+  "spelling_text": {
+    "description": "Text which is tokenised into words and lowercased, but not stemmed, stopworded, etc. This can be used for spelling correction, or exact word matching",
+    "es_config": {
+      "type": "string",
+      "index": "analyzed",
+      "analyzer": "spelling_analyzer",
+      "include_in_all": false
+    }
+  },
+
+  "best_bet_exact_match_text": {
+    "description": "Type used in best-bets implementation for matching the whole stored query exactly (other than lowercasing and whitespace trimming)",
+    "es_config": {
+      "type": "string",
+      "index": "analyzed",
+      "analyzer": "exact_match"
+    }
+  },
+
+  "best_bet_stemmed_match_text": {
+    "description": "Type used in best-bets implementation for matching the stored query with stemming and word splitting",
+    "es_config": {
+      "type": "string",
+      "index": "analyzed",
+      "analyzer": "best_bet_stemmed_match"
+    }
+  },
+
+  "float": {
+    "description": "A floating point number stored such that it can be used in ranking calculations",
+    "es_config": {
+      "type": "float",
+      "store": true
+    }
+  },
+
+  "boolean": {
+    "description": "A boolean value which can be returned and used for filtering and facetting",
+    "es_config": {
+      "type": "boolean",
+      "include_in_all": false
+    }
+  },
+
+  "date": {
+    "description": "A date which can be returned and used for ordering, filtering and facetting",
+    "filter_type": "date",
+    "es_config": {
+      "type": "date",
+      "include_in_all": false
+    }
+  },
+
+  "objects": {
+    "description": "A JSON object which contains a defined set of child fields.",
+    "children": "named",
+    "multivalued": true,
+    "es_config": {
+      "type": "object",
+      "enabled": "true",
+      "dynamic": "strict",
+      "include_in_all": false
+    }
+  },
+
+  "opaque_object": {
+    "description": "A JSON object which is returned, but not parsed or modified by elasticsearch",
+    "children": "dynamic",
+    "es_config": {
+      "type": "object",
+      "enabled": "false",
+      "include_in_all": false
+    }
+  }
+}

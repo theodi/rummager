@@ -1,24 +1,38 @@
 # Rummager
 
-Rummager is now primarily based on elasticsearch.
+Rummager is the internal GOV.UK API for search.
 
-## Get started
+## Live examples
 
-Install [elasticsearch 0.20](http://www.elasticsearch.org/downloads/0-20-6/).
-Rummager doesn't work with 0.90.
+- [alphagov/frontend](https://github.com/alphagov/frontend) uses Rummager to serve the GOV.UK search at [gov.uk/search](https://www.gov.uk/search).
+- [alphagov/finder-frontend](https://github.com/alphagov/finder-frontend) uses Rummager to serve document finders like [gov.uk/aaib-reports](https://www.gov.uk/aaib-reports).
 
-Run the application with `./startup.sh` this uses shotgun/thin.
+This API is publicly accessible:
+
+https://www.gov.uk/api/search.json?q=taxes
+![Screenshot of API Response](docs/api-screenshot.png)
+
+## Technical documentation
+
+This is a Sinatra application that provides an API for search to multiple applications. It isn't supposed to be used by regular users, but it is publicly available on [gov.uk/api/search.json](https://www.gov.uk/api/search.json?q=taxes).
+
+### Dependencies
+
+- [elasticsearch](https://github.com/elastic/elasticsearch) - "You Know, for Search...".
+- [redis](https://github.com/redis/redis) - used by indexing workers.
+
+### Setup
 
 To create indices, or to update them to the latest index settings, run:
 
     RUMMAGER_INDEX=all bundle exec rake rummager:migrate_index
 
-Rummager has an asynchronous mode, disabled in development by default, that
-posts documents to a queue to be indexed later by a worker. To run this in
-development, you need to run both of these commands:
+If you have indices from a Rummager instance before aliased indices, run:
 
-    ENABLE_QUEUE=1 ./startup.sh
-    bundle exec rake jobs:work
+    RUMMAGER_INDEX=all bundle exec rake rummager:migrate_from_unaliased_index
+
+If you don't know which of these you need to run, try running the first one; it
+will fail safely with an error if you have an unmigrated index.
 
 ## Indexing content
 
@@ -36,24 +50,28 @@ By default, Panopticon will not try to index search content in development mode,
 
   UPDATE_SEARCH=1
 
-
-## Adding a new index
-
 To add a new index to Rummager, you'll first need to add it to the list of index names Rummager knows about in [`elasticsearch.yml`](elasticsearch.yml). For instance, you might change it to:
 
     index_names: ["dapaas", "odi", "my_new_index"]
 
-To create the index, you'll need to run:
+### Running the application
 
-    RUMMAGER_INDEX=my_new_index bundle exec rake rummager:migrate_index
+If you're running the GDS development VM:
 
-This task will fail if you've already created an index with this name, as
-Rummager can't add an alias that is the name of an existing index. In this case,
-you'll either need to delete your existing index or, if you want to keep its
-contents, run:
+    cd /var/govuk/development && bundle exec bowl rummager
 
-    RUMMAGER_INDEX=my_new_index bundle exec rake rummager:migrate_from_unaliased_index
+If you're not running the GDS development VM:
 
+    ./startup.sh
+
+Rummager should then be available at [rummager.dev.gov.uk](http://rummager.dev.gov.uk/unified_search.json?q=taxes).
+
+Rummager has an asynchronous mode, disabled in development by default, that
+posts documents to a queue to be indexed later by a worker. To run this in
+development, you need to run both of these commands:
+
+ENABLE_QUEUE=1 ./startup.sh
+bundle exec rake jobs:work
 
 ## Once ODI search is LIVE
 
@@ -61,14 +79,74 @@ The below Health check will need updating with relevant data for ODI and then yo
 
 ## Health check
 
-As we work on rummager we want some objective metrics of the performance of search. That's what the health check is for.
+### Running the test suite
 
-To run it first download the healthcheck data:
+    bundle exec rake
 
-$ ./bin/health_check -d
+### Indexing & Reindexing
 
-Then run against your chosen indices:
+After changing the schema, you'll need to migrate the index.
 
-$ ./bin/health_check government mainstream
+    RUMMAGER_INDEX=all bundle exec rake rummager:migrate_index
 
-By default it will run against the local search instance. You can run against a remote search service using the --json or --html options.
+### Example API output
+
+The simplest query:
+
+    curl 'http://rummager.dev.gov.uk/unified_search.json?q=taxes'
+
+For the most up to date query syntax and API output, check the documentation for individual endpoints in [app.rb](app.rb).
+
+```json
+{  
+   "results":[  
+      {  
+         "title":"Renew vehicle tax",
+         "subsection":"car-tax-discs",
+         "description":"Get vehicle tax from the DVLA for your car, motorbike, lorry, bus or other vehicle - online, by phone or at the Post Office",
+         "link":"/vehicle-tax",
+         "format":"transaction",
+         "organisations":[  
+            {  
+               "slug":"department-for-transport",
+               "link":"/government/organisations/department-for-transport",
+               "title":"Department for Transport",
+               "acronym":"DFT",
+               "organisation_type":"Ministerial department",
+               "organisation_state":"live"
+            },
+            {  
+               "slug":"driver-and-vehicle-licensing-agency",
+               "link":"/government/organisations/driver-and-vehicle-licensing-agency",
+               "title":"Driver and Vehicle Licensing Agency",
+               "acronym":"DVLA",
+               "organisation_state":"live"
+            }
+         ],
+         "public_timestamp":"2014-12-09T16:21:03+00:00",
+         "section":"driving",
+         "index":"mainstream",
+         "es_score":0.29372323,
+         "_id":"/vehicle-tax",
+         "document_type":"edition"
+      },
+      { ... }
+      ],
+   "total":11876,
+   "start":0,
+   "facets":{  
+
+   },
+   "suggested_queries":[]
+}
+```
+
+
+### Additional Docs
+
+- [Health Check](docs/health-check.md): usage instructions for the Health Check functionality.
+- [Popularity information](docs/popularity.md): Rummager uses Google Analytics data to improve search results.
+
+## Licence
+
+[MIT License](LICENCE.txt)

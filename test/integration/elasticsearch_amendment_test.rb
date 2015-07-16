@@ -7,18 +7,19 @@ class ElasticsearchAmendmentTest < IntegrationTest
   def setup
     stub_elasticsearch_settings
     enable_test_index_connections
-    create_test_index
+    create_test_indexes
     add_sample_document
   end
 
   def teardown
-    clean_index_group
+    clean_test_indexes
   end
 
   def sample_document_attributes
     {
       "title" => "TITLE",
       "description" => "DESCRIPTION",
+      "organisations" => ["hm-magic"],
       "format" => "answer",
       "link" => "/an-example-answer",
       "indexable_content" => "HERE IS SOME CONTENT"
@@ -26,14 +27,14 @@ class ElasticsearchAmendmentTest < IntegrationTest
   end
 
   def add_sample_document
-    post "/documents", MultiJson.encode(sample_document_attributes)
+    post "/documents", sample_document_attributes.to_json
     assert last_response.ok?
   end
 
   def test_should_get_a_document_through_elasticsearch
     get "/documents/%2Fan-example-answer"
     assert last_response.ok?
-    parsed_response = MultiJson.decode(last_response.body)
+    parsed_response = JSON.parse(last_response.body)
 
     sample_document_attributes.each do |key, value|
       assert_equal value, parsed_response[key]
@@ -53,9 +54,27 @@ class ElasticsearchAmendmentTest < IntegrationTest
 
     get "/documents/%2Fan-example-answer"
     assert last_response.ok?
-    parsed_response = MultiJson.decode(last_response.body)
+    parsed_response = JSON.parse(last_response.body)
 
     updates = {"title" => "A new title"}
+    sample_document_attributes.merge(updates).each do |key, value|
+      assert_equal value, parsed_response[key]
+    end
+  end
+
+  def test_should_amend_tags_correctly
+    post "/documents/%2Fan-example-answer", [
+      "specialist_sectors[]=oil-and-gas/licensing",
+    ].join("&")
+
+    get "/documents/%2Fan-example-answer"
+    assert last_response.ok?
+    parsed_response = JSON.parse(last_response.body)
+
+    updates = {
+      "tags" => ["organisation:hm-magic", "sector:oil-and-gas/licensing"],
+      "specialist_sectors" => ["oil-and-gas/licensing"],
+    }
     sample_document_attributes.merge(updates).each do |key, value|
       assert_equal value, parsed_response[key]
     end

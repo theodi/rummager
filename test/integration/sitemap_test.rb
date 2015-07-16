@@ -8,7 +8,7 @@ class SitemapTest < IntegrationTest
 
   def setup
     @index_names = %w(mainstream_test detailed_test government_test)
-    stub_elasticsearch_settings(@index_names)
+    stub_elasticsearch_settings
     enable_test_index_connections
 
     @index_names.each do |i|
@@ -75,6 +75,9 @@ class SitemapTest < IntegrationTest
         "indexable_content" => "Tax, benefits, roads and stuff"
       },
       {
+        "title" => "Bad document missing a link field",
+      },
+      {
         "title" => "Some content from Inside Gov",
         "description" => "We list some inside gov results in the mainstream index.",
         "format" => "inside-government-link",
@@ -86,7 +89,7 @@ class SitemapTest < IntegrationTest
 
   def add_sample_documents
     sample_document_attributes.each do |sample_document|
-      post "/documents", MultiJson.encode(sample_document)
+      post "/documents", sample_document.to_json
       assert last_response.ok?
     end
   end
@@ -116,20 +119,20 @@ class SitemapTest < IntegrationTest
 
   def test_should_generate_multiple_sitemaps
     SitemapGenerator.stubs(:sitemap_limit).returns(2)
-    generator = SitemapGenerator.new(search_server.all_indices)
+    generator = SitemapGenerator.new(search_server.content_indices)
     sitemap_xml = generator.sitemaps
     assert_equal 3, sitemap_xml.length
   end
 
   def test_should_not_include_recommended_links
-    generator = SitemapGenerator.new(search_server.all_indices)
+    generator = SitemapGenerator.new(search_server.content_indices)
     sitemap_xml = generator.sitemaps
     assert_equal 1, sitemap_xml.length
     refute_includes sitemap_xml[0], "/external-example-answer"
   end
 
   def test_should_not_include_inside_government_links
-    generator = SitemapGenerator.new(search_server.all_indices)
+    generator = SitemapGenerator.new(search_server.content_indices)
     sitemap_xml = generator.sitemaps
     assert_equal 1, sitemap_xml.length
     refute_includes sitemap_xml[0],  "/government/some-content"

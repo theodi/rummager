@@ -8,25 +8,18 @@ LIBRARY_PATH = PROJECT_ROOT + "lib/"
   $LOAD_PATH.unshift(path) unless $LOAD_PATH.include?(path)
 end
 
-INDICES = %w{mainstream detailed government}
-DEFAULT_HTML_URL = "https://www.gov.uk/search"
 DEFAULT_JSON_URL = "https://www.gov.uk/api/search.json"
 require "logging"
 require "search_config"
 require "slop"
 require 'health_check/logging_config'
-require 'health_check/checker'
-require 'health_check/local_search_client'
-require 'health_check/html_search_client'
+require 'health_check/search_checker'
+require 'health_check/suggestion_checker'
 require 'health_check/json_search_client'
 require 'health_check/downloader'
 require 'health_check/basic_auth_credentials'
 
 class HealthCheckCLI
-
-  class Usage < StandardError; end
-
-
   attr_reader :opts, :args
 
   def usage(opts, message = nil)
@@ -37,18 +30,17 @@ class HealthCheckCLI
   def run!
     health_checker = self
     Slop.parse do
-      banner %Q{Usage: #{File.basename(__FILE__)} {#{INDICES.join("|")}}
+      banner %Q{Usage: #{File.basename(__FILE__)}
 
-    Runs a health check on the specified index/indices.
+    Runs a health check.
     }
       on 'd', 'download', "Download search healthcheck data"
-      on 'h', 'help', "Show help"
-      on 'l', 'local', "Connect to local index directly (default)"
+      on 'h', 'help', "Show this message"
       on 'limit=', "Limit to the first n tests", as: Integer
       on 'a', 'auth=', "Basic auth credentials (of the form 'user:pass'", as: HealthCheck::BasicAuthCredentials
-      on 'H', 'html=', "Connect to a frontend at the the given url (eg. #{DEFAULT_HTML_URL})", default: DEFAULT_HTML_URL
-      on 'j', 'json=', "Connect to a Rummager combined or unified search endpoint at the the given url (eg. #{DEFAULT_JSON_URL})", default: DEFAULT_JSON_URL
+      on 'j', 'json=', "Connect to a Rummager unified search endpoint at the the given url (default) (eg. #{DEFAULT_JSON_URL})", default: DEFAULT_JSON_URL
       on 'v', 'verbose', "Show verbose logging output"
+      on 'type=', "Which tests to run. 'suggestions' or 'results' (default)"
       run(health_checker)
     end
   end
@@ -64,54 +56,63 @@ class HealthCheckCLI
 
     if opts.download?
       FileUtils.mkdir_p(DATA_DIR)
-      HealthCheck::Downloader.new(data_dir: DATA_DIR).download(*INDICES)
-    elsif args.size == 0
-      usage(opts)
-    elsif illegal_indices(args).any?
-      usage(opts, "ERROR: Unrecognised index(es) #{illegal_indices(args).join(", ")}")
+      HealthCheck::Downloader.new(data_dir: DATA_DIR).download!
     elsif opts.help?
-      puts "help"
       usage(opts)
     else
-      run_tests(args)
+      if opts["type"] == "suggestions"
+        run_suggestions_test
+      else
+        run_search_result_tests
+      end
     end
   end
 
-  def illegal_indices(indices)
-    indices - INDICES
+  private
+
+  def run_search_result_tests
+    scores = run_search_result_test_on_index
+    scores.summarise("Overall score")
   end
 
-private
-  def run_tests(indices)
-    scores = indices.map { |index_name| run_one_test(index_name) }
-    scores.zip(indices).inject(HealthCheck::Calculator.new) do |summary, (result, index_name)|
-      result.summarise("#{index_name.capitalize} score")
-      summary + result
-    end.summarise("Overall score")
-  end
+  def run_search_result_test_on_index
+    check_file_path = DATA_DIR + "search-results.csv"
+    check_file = open_file(check_file_path)
 
-  def run_one_test(index_name)
-    check_file_path = DATA_DIR + "#{index_name}-weighted-search-terms.csv"
-    check_file = open(check_file_path)
-    if opts["limit"]
-      # Take the first n + 1 lines (including header row) from the check file
-      check_file = StringIO.new(check_file.take(opts["limit"] + 1).join)
-    end
-
-    HealthCheck::Checker.new(
-      search_client: search_client_for(index_name),
+    HealthCheck::SearchChecker.new(
+      search_client: search_client,
       test_data: check_file
     ).run!
   end
 
-  def search_client_for(index_name)
-    if opts.html?
-      HealthCheck::HtmlSearchClient.new(base_url: URI.parse(opts["html"]), authentication: opts[:auth], index: index_name)
-    elsif opts.json?
-      HealthCheck::JsonSearchClient.new(base_url: URI.parse(opts["json"]), authentication: opts[:auth], index: index_name)
-    else
-      HealthCheck::LocalSearchClient.new(index: index_name)
+  # Run a health-check on the suggestions in suggestions.csv
+  def run_suggestions_test
+    check_file = open_file(DATA_DIR + "suggestions.csv")
+
+    calculator = HealthCheck::SuggestionChecker.new(
+      search_client: search_client,
+      test_data: check_file
+    ).run!
+
+    calculator.summarise("Overall score")
+  end
+
+  def search_client
+    HealthCheck::JsonSearchClient.new(
+      base_url: URI.parse(opts["json"]),
+      authentication: opts[:auth]
+    )
+  end
+
+  def open_file(filename)
+    file = open(filename)
+
+    # Take the first n + 1 lines (including header row) from the check file
+    if opts["limit"]
+      file = StringIO.new(file.take(opts['limit'] + 1).join)
     end
+
+    file
   end
 end
 

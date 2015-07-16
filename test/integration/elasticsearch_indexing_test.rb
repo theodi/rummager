@@ -18,18 +18,19 @@ class ElasticsearchIndexingTest < IntegrationTest
   end
 
   def teardown
-    clean_index_group
+    clean_test_indexes
   end
 
   def retrieve_document_from_rummager(link)
     get "/documents/#{CGI::escape(link)}"
-    MultiJson.decode(last_response.body)
+    JSON.parse(last_response.body)
   end
 
   def assert_document_is_in_rummager(document)
     retrieved = retrieve_document_from_rummager(document['link'])
+    retrieved_document_keys = retrieved.keys - ["popularity"]
 
-    assert_equal document.keys.sort, retrieved.keys.sort
+    assert_equal document.keys.sort, retrieved_document_keys.sort
 
     document.each do |key, value|
       assert_equal value, retrieved[key], "Field #{key} should be '#{value}' but was '#{retrieved[key]}'"
@@ -37,55 +38,34 @@ class ElasticsearchIndexingTest < IntegrationTest
   end
 
   def test_should_indicate_success_in_response_code_when_adding_a_new_document
-    create_test_index
+    create_test_indexes
 
-    post "/documents", MultiJson.encode(@sample_document)
+    post "/documents", @sample_document.to_json
     assert last_response.ok?
   end
 
   def test_after_adding_a_document_to_index_should_be_able_to_retrieve_it_again
-    create_test_index
+    create_test_indexes
 
-    post "/documents", MultiJson.encode(@sample_document)
+    post "/documents", @sample_document.to_json
 
     assert_document_is_in_rummager(@sample_document)
   end
 
-  def test_should_be_able_to_index_a_document_with_additional_fields
-    add_field_to_mappings("topics")
-    create_test_index
+  def test_can_index_fields_of_type_opaque_object
+    create_test_indexes
 
-    test_data = @sample_document.merge("topics" => [1,2])
-
-    post "/documents", MultiJson.encode(test_data)
-
-    assert_document_is_in_rummager(test_data)
-  end
-
-  def test_indexing_a_promoted_document_sets_the_promoted_for_field
-    stub_modified_schema do |schema|
-      schema["mappings"]["default"]["edition"]["properties"].merge!(
-        "promoted_for" => { "type" => "string", "index" => "analyzed" }
-      )
-
-      schema["promoted_results"] = [{
-        "link" => "/jobsearch",
-        "terms" => "job"
-      }]
-    end
-    create_test_index
-
-    promoted_document = {
-      "title" => "TITLE",
-      "description" => "DESCRIPTION",
-      "format" => "answer",
-      "link" => "/jobsearch",
-      "indexable_content" => "HERE IS SOME CONTENT"
+    document = {
+      "format" => "statistics_announcemnt",
+      "link" => "/a-link",
+      "metadata" => {
+        "confirmed" => true,
+        "display_date" => "27 August 2014 9:30am",
+      },
     }
 
-    post "/documents", MultiJson.encode(promoted_document)
+    post "/documents", document.to_json
 
-    retrieved_document = retrieve_document_from_rummager(promoted_document['link'])
-    assert_equal "job", retrieved_document["promoted_for"]
+    assert_document_is_in_rummager(document)
   end
 end
