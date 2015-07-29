@@ -7,7 +7,7 @@ require "airbrake"
 set :search_config, SearchConfig.new
 set :default_index_name, "dapaas"
 
-configure :development do
+configure :development, :test do
   set :protection, false
 end
 
