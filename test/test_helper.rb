@@ -1,4 +1,6 @@
 ENV['RACK_ENV'] = 'test'
+require "dotenv"
+Dotenv.load
 
 # Simplecov should be required before any other code is loaded statement to prevent
 # false negatives.
