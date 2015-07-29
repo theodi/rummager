@@ -1,7 +1,7 @@
 language: ruby
 cache: bundler
 rvm:
-- 1.9.3
+- 2.1.6
 after_success:
 - ! '[ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] &&
   curl -v -X DELETE -u $GITHUB_USER:$GITHUB_PASSWORD "https://api.github.com/repos/$TRAVIS_REPO_SLUG/git/refs/tags/CURRENT"'
@@ -10,9 +10,9 @@ after_success:
   "Content-Type:application/json" -u $GITHUB_USER:$GITHUB_PASSWORD "https://api.github.com/repos/$TRAVIS_REPO_SLUG/git/refs"'
 services:
 - redis-server
+- elasticsearch
 before_install:
-- wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.6.deb
-- sudo dpkg -i elasticsearch-0.20.6.deb
+- sleep 10
 - sudo apt-get update -qq
 - sudo apt-get install -qq aspell aspell-en libaspell-dev
 branches:
