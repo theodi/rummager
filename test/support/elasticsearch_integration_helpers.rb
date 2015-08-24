@@ -120,4 +120,20 @@ module ElasticsearchIntegrationHelpers
     BestBetsChecker.any_instance.stubs(:metasearch_index).returns(@ms)
     @ms
   end
+
+  def add_field_to_mappings(fieldname, type="string")
+    stub_modified_schema do |schema|
+      properties = schema["mappings"]["default"]["edition"]["properties"]
+      properties.merge!({fieldname.to_s => { "type" => type, "index" => "not_analyzed" }})
+    end
+  end
+
+  def stub_modified_schema
+    schema = deep_copy(app.settings.search_config.elasticsearch_schema)
+
+    # Allow the block to modify the schema copy directly
+    yield schema
+
+    app.settings.search_config.stubs(:elasticsearch_schema).returns(schema)
+  end
 end
