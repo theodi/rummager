@@ -1,6 +1,10 @@
 require "test_helper"
 require "govuk_search_presenter"
 
+def stub_presenter
+  stub(present: {"results" => []})
+end
+
 class GovukSearchPresenterTest < ShouldaUnitTestCase
 
   context "no streams" do
@@ -30,10 +34,6 @@ class GovukSearchPresenterTest < ShouldaUnitTestCase
   end
 
   context "multiple streams" do
-    def stub_presenter
-      stub(present: {"results" => []})
-    end
-
     setup do
       @top_results = stub("top results")
       @si_results = stub("S&I results")
