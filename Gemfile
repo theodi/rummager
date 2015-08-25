@@ -2,7 +2,6 @@ ruby "1.9.3"
 #ruby-gemset=rummager
 
 source "https://rubygems.org"
-source "https://BnrJb6FZyzspBboNJzYZ@gem.fury.io/govuk/"
 
 gem "thin"
 gem "foreman", "< 0.65.0"
@@ -19,7 +18,7 @@ gem "rest-client", "1.6.7"
 gem "logging", "1.8.1"
 gem 'nokogiri', "~> 1.5"
 gem 'whenever', require: false
-gem 'ffi-aspell', "0.0.3"
+gem 'ffi-aspell', "1.0.2"
 gem "slop", "3.4.5"
 gem "sidekiq", "2.13.0"
 # pin to version that includes security vulnerability fix
