@@ -4,6 +4,7 @@ require "best_bets_checker"
 
 class BestBetsCheckerTest < ShouldaUnitTestCase
 
+=begin commented out becoz the best bets has gone away
   def best_bets_query(query)
     {
       query: {
@@ -172,5 +173,5 @@ class BestBetsCheckerTest < ShouldaUnitTestCase
       assert_equal(["/jobsearch"], @checker.worst_bets)
     end
   end
-
+=end
 end

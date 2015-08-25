@@ -74,6 +74,7 @@ module TestHelpers
   def stub_elasticsearch_request(hash)
     hash.each do |url, response|
       stub_request(:get, "http://localhost:9200#{url}").to_return(body: JSON.dump(response))
+      stub_request(:get, "http://elasticsearch:9200#{url}").to_return(body: JSON.dump(response))
     end
   end
 

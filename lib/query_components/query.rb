@@ -7,7 +7,7 @@ module QueryComponents
     SERVICE_MANUAL_BOOST_FACTOR = 0.1
 
     def payload
-      QueryComponents::BestBets.new(params).wrap(query_hash)
+      # QueryComponents::BestBets.new(params).wrap(query_hash)
     end
 
     private
