@@ -2,7 +2,6 @@ require "test_helper"
 require "unified_search_builder"
 
 class BestBetsTest < ShouldaUnitTestCase
-=begin Removing tests - Best Bets has gone
   context "when best bets is disabled in debug" do
     should "return the query without modification" do
       builder = QueryComponents::BestBets.new(debug: { disable_best_bets: true })
@@ -62,5 +61,4 @@ class BestBetsTest < ShouldaUnitTestCase
       assert_equal expected, result
     end
   end
-=end
 end

@@ -3,7 +3,7 @@ require "unified_search_builder"
 
 class UnifiedSearchBuilderTest < ShouldaUnitTestCase
   def setup
-    # BestBetsChecker.any_instance.stubs best_bets: [], worst_bets: []
+    BestBetsChecker.any_instance.stubs best_bets: [], worst_bets: []
   end
 
   context "with a simple search query" do
@@ -15,7 +15,7 @@ class UnifiedSearchBuilderTest < ShouldaUnitTestCase
       assert_equal 11, result[:from]
       assert_equal 34, result[:size]
       assert_equal ['a_field'], result[:fields]
-      # assert result.key?(:query) # Y this fail?
+      assert result.key?(:query)
     end
   end
 
