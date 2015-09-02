@@ -50,6 +50,8 @@ class UnifiedSearchTest < MultiIndexTest
   end
 
   def test_filters_by_index
+    reset_content_indexes_with_content(section_count: 1)
+
     get "/unified_search?q=important&index=mainstream_test"
     links = parsed_response["results"].map do |result|
       result["link"]
