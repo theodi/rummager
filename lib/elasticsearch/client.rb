@@ -1,4 +1,6 @@
 require "logging"
+require "dotenv"
+Dotenv.load
 
 module Elasticsearch
   class Client
@@ -8,7 +10,7 @@ module Elasticsearch
     SAFE_ABSOLUTE_PATHS = ["/_bulk", "/_status", "/_aliases", "/_search/scroll"]
 
     def initialize(base_uri, args = {})
-      @base_uri = base_uri
+      @base_uri = base_uri || ENV['QUIRKAFLEEG_ELASTICSEARCH_LOCATION']
       @error_log_level = :error
       @timeout = args[:timeout]
       @open_timeout = args[:open_timeout]
@@ -118,6 +120,7 @@ module Elasticsearch
         args[:headers] = headers if headers
         args[:timeout] = @timeout if @timeout
         args[:open_timeout] = @open_timeout if @open_timeout
+        puts args
         logger.debug(args.reject { |k| k == :payload })
         RestClient::Request.execute(args)
       end
