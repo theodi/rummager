@@ -1,40 +1,21 @@
 require "active_support/inflector"
+require "entity_expander"
 
 class ResultSetPresenter
 
-  def initialize(result_set, context = {})
+  def initialize(result_set, context = {}, schema = nil)
     @result_set = result_set
     @context = context
+    @schema = schema
   end
 
   def present
-    presentable_hash = {
+    {
       "total" => @result_set.total,
-      "results" => results
+      "results" => results,
+      "spelling_suggestions" => []
     }
-    if spelling_suggestions
-      presentable_hash["spelling_suggestions"] = spelling_suggestions
-    end
-    presentable_hash
   end
-
-  PRESENTATION_FORMAT_TRANSLATION = {
-    "planner" => "answer",
-    "smart_answer" => "answer",
-    "calculator" => "answer",
-    "licence_finder" => "answer",
-    "custom_application" => "answer",
-    "calendar" => "answer"
-  }
-
-  FORMAT_NAME_ALTERNATIVES = {
-    "programme" => "Benefits & credits",
-    "transaction" => "Services",
-    "local_transaction" => "Services",
-    "place" => "Services",
-    "answer" => "Quick answers",
-    "specialist_guidance" => "Specialist guidance"
-  }
 
 private
   def results
@@ -42,122 +23,70 @@ private
   end
 
   def build_result(document)
-    result = document.to_hash
-
-    if result['document_series'] && should_expand_document_series?
-      result['document_series'] = result['document_series'].map do |slug|
-        document_series_by_slug(slug)
-      end
-    end
-    if result['document_collections'] && should_expand_document_collections?
-      result['document_collections'] = result['document_collections'].map do |slug|
-        document_collection_by_slug(slug)
-      end
-    end
-    if result['organisations'] && should_expand_organisations?
-      result['organisations'] = result['organisations'].map do |slug|
-        organisation_by_slug(slug)
-      end
-    end
-    if result['topics'] && should_expand_topics?
-      result['topics'] = result['topics'].map do |slug|
-        topic_by_slug(slug)
-      end
-    end
-    if result['world_locations'] && should_expand_world_locations?
-      result['world_locations'] = result['world_locations'].map do |slug|
-        world_location_by_slug(slug)
-      end
-    end
+    result = expand_metadata(document.to_hash)
+    result = EntityExpander.new(@context).new_result(result)
     result
   end
 
-  def should_expand_document_series?
-    !! document_series_registry
-  end
-
-  def should_expand_document_collections?
-    !! document_collection_registry
-  end
-
-  def should_expand_organisations?
-    !! organisation_registry
-  end
-
-  def should_expand_topics?
-    !! topic_registry
-  end
-
-  def should_expand_world_locations?
-    !! world_location_registry
-  end
-
-  def document_series_registry
-    @context[:document_series_registry]
-  end
-
-  def document_collection_registry
-    @context[:document_collection_registry]
-  end
-
-  def organisation_registry
-    @context[:organisation_registry]
-  end
-
-  def topic_registry
-    @context[:topic_registry]
-  end
-
-  def world_location_registry
-    @context[:world_location_registry]
-  end
-
-  def spelling_suggestions
-    @context[:spelling_suggestions]
-  end
-
-  def document_series_by_slug(slug)
-    document_series = document_series_registry && document_series_registry[slug]
-    if document_series
-      document_series.to_hash.merge("slug" => slug)
-    else
-      {"slug" => slug}
+  def expand_metadata(document_attrs)
+    if @schema.nil?
+      return document_attrs
     end
+
+    document_schema = schema_for_document(document_attrs)
+
+    document_attrs = apply_multivalued(document_schema, document_attrs)
+
+    params_to_expand = document_attrs.select { |k, _|
+      document_schema.allowed_values.include?(k)
+    }
+
+    expanded_params = params_to_expand.reduce({}) { |params, (field_name, values)|
+      params.merge(
+        field_name => Array(values).map { |raw_value|
+          document_schema.allowed_values[field_name].find { |allowed_value|
+            allowed_value.fetch("value") == raw_value
+          }
+        }
+      )
+    }
+
+    document_attrs.merge(expanded_params)
   end
 
-  def document_collection_by_slug(slug)
-    document_collection = document_collection_registry && document_collection_registry[slug]
-    if document_collection
-      document_collection.to_hash.merge("slug" => slug)
-    else
-      {"slug" => slug}
-    end
+  def apply_multivalued(document_schema, document_attrs)
+    document_attrs.reduce({}) { |result, (field_name, values)|
+      if field_name[0] == '_'
+        # Special fields are always returned as single values.
+        result[field_name] = values
+        return result
+      end
+
+      # Convert to array for consistency between elasticsearch 0.90 and 1.0.
+      # When we no longer support elasticsearch <1.0, values here will
+      # always be an array, so this block can be removed.
+      if values.nil?
+        values = []
+      elsif !(values.is_a?(Array))
+        values = [values]
+      end
+
+      if document_schema.fields.fetch(field_name).type.multivalued
+        result[field_name] = values
+      else
+        result[field_name] = values.first
+      end
+      result
+    }
   end
 
-  def organisation_by_slug(slug)
-    organisation = organisation_registry && organisation_registry[slug]
-    if organisation
-      organisation.to_hash.merge("slug" => slug)
-    else
-      {"slug" => slug}
-    end
+  def schema_for_document(document)
+    index = document[:_metadata]["_index"]
+    index_schema = @schema.schema_for_alias_name(index)
+    index_schema.document_type(document_type(document))
   end
 
-  def topic_by_slug(slug)
-    topic = topic_registry && topic_registry[slug]
-    if topic
-      topic.to_hash.merge("slug" => slug)
-    else
-      {"slug" => slug}
-    end
-  end
-
-  def world_location_by_slug(slug)
-    world_location = world_location_registry && world_location_registry[slug]
-    if world_location
-      world_location.to_hash.merge("slug" => slug)
-    else
-      {"slug" => slug}
-    end
+  def document_type(document)
+    document.fetch(:_metadata, {}).fetch("_type", nil)
   end
 end

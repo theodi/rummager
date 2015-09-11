@@ -12,10 +12,10 @@ class Sitemap
     @timestamp = timestamp
   end
 
-  def generate(all_indices)
+  def generate(content_indices)
     FileUtils.mkdir_p(@output_path)
     sitemap_writer = SitemapWriter.new(@output_path, @timestamp)
-    sitemap_filenames = sitemap_writer.write_sitemaps(all_indices)
+    sitemap_filenames = sitemap_writer.write_sitemaps(content_indices)
     return write_index(sitemap_filenames)
   end
 
@@ -55,8 +55,8 @@ class SitemapWriter
     @sitemap_file_count = 0
   end
 
-  def write_sitemaps(all_indices)
-    sitemap_generator = SitemapGenerator.new(all_indices)
+  def write_sitemaps(content_indices)
+    sitemap_generator = SitemapGenerator.new(content_indices)
     # write our sitemap files and return an array of filenames
     sitemap_generator.sitemaps.map do |sitemap_xml|
       filename = next_filename
@@ -92,7 +92,9 @@ class SitemapGenerator
 
       @sitemap_indices.each do |index|
         index.all_document_links(EXCLUDED_FORMATS).each do |document|
-          yielder << document
+          if document
+            yielder << document
+          end
         end
       end
     end
@@ -108,7 +110,8 @@ class SitemapGenerator
     builder = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') do |xml|
       xml.urlset(xmlns: "http://www.sitemaps.org/schemas/sitemap/0.9") do
         chunk.each do |url|
-          url = "#{base_url}#{url}" if url.start_with?("/")
+          url = Array(url).first
+          url = URI.join(base_url, url) unless url.start_with?("http")
           xml.url {
             xml.loc url
           }

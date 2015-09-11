@@ -1,0 +1,168 @@
+type: synonym
+synonyms: &synonyms [
+  # Multiple spellings
+  "one, 1",
+  "two, 2",
+  "three, 3",
+  "four, 4",
+  "five, 5",
+  "six, 6",
+  "seven, 7",
+  "eight, 8",
+  "nine, 9",
+  "ten, 10",
+  "adviser, advisor",
+  "licence, license",
+  "trademark, trade mark",
+
+  # Split words
+  "opendata => open data",
+
+  # Acronyms
+  "ogl => open government licence",
+
+  # Common misspellings
+  "addres => address",
+  "adress => address",
+  "aplication => application",
+  "applicaton => application",
+  "assesment => assessment",
+  "attendace => attendance",
+  "attendence => attendance",
+  "bene => benefit",
+  "benfit => benefit",
+  "benfits => benefits",
+  "benifit => benefit",
+  "benifits => benefits",
+  "budgetting => budgeting",
+  "buget => budget",
+  "bugeting => budgeting",
+  "buisness => business",
+  "businessplan => business plan",
+  "dta => data",
+  "dapaaas => dapaas",
+  "evnts => events",
+  "disk => disk, disc",
+  "goverment => government",
+  "insuranc => insurance",
+  "insurence => insurance",
+  "interveiw => interview",
+  "jobd => jobs",
+  "licience => licence",
+  "liscence => licence",
+  "lisence => licence",
+  "mimimum => minimum",
+  "minimun => minimum",
+  "minium => minimum",
+  "minumum => minimum",
+  "nationa => national",
+  "numbe => number",
+  "serach => search",
+  "socail => social",
+]
+
+
+# Promoted results
+#
+# When indexing a promoted item, the promoted_for field is set with the given
+# terms. At search time an extra query checks for matches between the user's
+# search phrase and the promoted item. The promoted item search does not have
+# a minimum_should_match so even a single word in common will trigger the
+# boosting. Any matches are boosted by 100x effectively forcing them to the
+# top.
+#
+# NOTES:
+#  - if you add items to this section, the index will need to be re-built
+#  - the terms are stemmed so there's no need to enter both 'job' and 'jobs'
+promoted_results:
+- terms: courses
+  link: /courses
+- terms: events
+  link: /events
+
+index:
+  settings:
+    analysis:
+      analyzer:
+        default:  # Indexing analyzer: doesn't use custom synonyms
+          type: custom
+          tokenizer: standard
+          filter: [standard, lowercase, stop, stemmer_english]
+        query_default:
+          type: custom
+          tokenizer: standard
+          filter: [standard, lowercase, synonym, stop, stemmer_english]
+        shingled_query_analyzer:
+          type: custom
+          tokenizer: standard
+          filter: [standard, lowercase, stop, stemmer_english, filter_shingle]
+      filter:
+        synonym:
+          type: synonym
+          synonyms: *synonyms
+        stemmer_english:
+          type: stemmer
+          name: english
+        filter_shingle:
+          type: shingle
+          max_shingle_size: 2
+          min_shingle_size: 2
+mappings:
+  default:
+    edition:
+      _all: { enabled: true }
+      properties:
+        title:       { type: string, index: analyzed }
+        description: { type: string, index: analyzed }
+        format:      { type: string, index: not_analyzed, include_in_all: false }
+        section:     { type: string, index: not_analyzed, include_in_all: false }
+        link:        { type: string, index: not_analyzed, include_in_all: false }
+        indexable_content: { type: string, index: analyzed }
+        promoted_for: { type: string, index: analyzed, include_in_all: false }
+  government:
+    edition:
+      _all: { enabled: true }
+      properties:
+        id:          { type: long, index: not_analyzed, include_in_all: false }
+        acronym:     { type: string, index: analyzed }
+        attachments:
+          properties:
+            content: {type: string, index: analyzed}
+            title: {type: string, index: analyzed}
+            isbn: {type: string, index: not_analyzed}
+            unique_reference: {type: string, index: not_analyzed}
+            command_paper_number: {type: string, index: not_analyzed}
+            hoc_paper_number: {type: string, index: not_analyzed}
+        description: { type: string, index: analyzed }
+        display_type: { type: string, index: not_analyzed, include_in_all: false }
+        document_collections: { type: string, index: not_analyzed, include_in_all: false }
+        document_series: { type: string, index: not_analyzed, include_in_all: false }
+        release_timestamp: { type: date, index: not_analyzed, include_in_all: false }
+        format:      { type: string, index: not_analyzed, include_in_all: false }
+        indexable_content: { type: string, index: analyzed }
+        link:        { type: string, index: not_analyzed, include_in_all: false }
+
+        # Note: the "metadata" property is intended for the storage of additional
+        # non-searchable document properties. This allows additional information
+        # to be stored and displayed in search results without having to make
+        # changes to the schema.
+        metadata: { type: object, index: no }
+
+        operational_field: { type: string, index: not_analyzed, include_in_all: false }
+        organisations: { type: string, index: not_analyzed, include_in_all: false }
+        organisation_state: { type: string, index: not_analyzed, include_in_all: false }
+        people: { type: string, index: not_analyzed, include_in_all: false }
+        promoted_for: { type: string, index: analyzed, include_in_all: false }
+        public_timestamp: { type: date, index: not_analyzed, include_in_all: false }
+        relevant_to_local_government: { type: boolean, index: not_analyzed, include_in_all: false }
+        search_format_types: { type: string, index: not_analyzed, include_in_all: false }
+        section:     { type: string, index: not_analyzed, include_in_all: false }
+        slug:        { type: string, index: not_analyzed, include_in_all: false }
+        subsection:  { type: string, index: not_analyzed, include_in_all: false }
+        subsubsection:  { type: string, index: not_analyzed, include_in_all: false }
+        title:       { type: string, index: analyzed }
+        topics: { type: string, index: not_analyzed, include_in_all: false }
+        world_locations: { type: string, index: not_analyzed, include_in_all: false }
+        has_official_document: { type: boolean, index: not_analyzed, include_in_all: false }
+        has_command_paper: { type: boolean, index: not_analyzed, include_in_all: false }
+        has_act_paper: { type: boolean, index: not_analyzed, include_in_all: false }

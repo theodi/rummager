@@ -4,7 +4,7 @@ module Elasticsearch
   class SearchQueryBuilder
     include Elasticsearch::Escaping
 
-    QUERY_ANALYZER = "query_default"
+    QUERY_ANALYZER = "query_with_old_synonyms"
 
     # `query`    - a string to search for
     # `mappings` - the field definitions for the index this query is going to
@@ -33,13 +33,13 @@ module Elasticsearch
         from: 0,
         size: @limit,
         query: {
-          custom_filters_score: {
+          function_score: {
             query: {
               bool: {
-                should: [core_query, promoted_items_query].compact
+                should: [core_query]
               }
             },
-            filters: format_boosts + [time_boost]
+            functions: format_boosts + [time_boost]
           }
         },
         sort: sort
@@ -116,16 +116,6 @@ module Elasticsearch
           operator: "or",
           fields: match_fields.keys,
           analyzer: "shingled_query_analyzer"
-        }
-      }
-    end
-
-    def promoted_items_query
-      {
-        query_string: {
-          default_field: "promoted_for",
-          query: escape(@query),
-          boost: 100
         }
       }
     end
@@ -214,7 +204,7 @@ module Elasticsearch
       boosted_formats.map do |format, boost|
         {
           filter: { term: { format: format } },
-          boost: boost
+          boost_factor: boost
         }
       end
     end
@@ -226,8 +216,17 @@ module Elasticsearch
     def time_boost
       {
         filter: { term: { search_format_types: "announcement" } },
-        script: "((0.05 / ((3.16*pow(10,-11)) * abs(time() - doc['public_timestamp'].date.getMillis()) + 0.05)) + 0.12)"
+        script_score: {
+          script: "((0.05 / ((3.16*pow(10,-11)) * abs(now - doc['public_timestamp'].date.getMillis()) + 0.05)) + 0.12)",
+          params: {
+            now: time_in_millis_to_nearest_minute,
+          },
+        }
       }
+    end
+
+    def time_in_millis_to_nearest_minute
+      (Time.now.to_i / 60) * 60000
     end
   end
 end

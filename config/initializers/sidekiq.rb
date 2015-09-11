@@ -1,21 +1,23 @@
-# This file will be overwritten on deployment
 require "sidekiq"
 
-if ENV["RACK_ENV"]
-  namespace = "rummager-#{ENV['RACK_ENV']}"
+redis_config_hash = YAML.load_file("config/redis.yml").symbolize_keys
+
+if ENV["RACK_ENV"] == "test"
+  namespace = "#{redis_config_hash[:namespace]}-#{ENV['RACK_ENV']}"
 else
-  namespace = "rummager"
+  namespace = redis_config_hash[:namespace]
+end
+
+if ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
+  url = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
+else
+  url = "redis://#{redis_config_hash[:host]}:#{redis_config_hash[:port]}/0"
 end
 
 redis_config = {
-  :namespace => namespace
+  url: url,
+  namespace: namespace
 }
-if ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
-  redis_config[:url] = ENV['QUIRKAFLEEG_RUMMAGER_REDIS_URL']
-else
-  redis_config[:url] = "redis://localhost:6379/0"
-end
-
 
 Sidekiq.configure_server do |config|
   config.redis = redis_config

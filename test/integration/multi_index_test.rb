@@ -5,48 +5,57 @@ require "rest-client"
 # Base class for tests which depend on having multiple indexes with test data
 # set up.
 class MultiIndexTest < IntegrationTest
-
-  INDEX_NAMES = ["mainstream_test", "detailed_test", "government_test"]
-
   def setup
-    stub_elasticsearch_settings(INDEX_NAMES)
+    stub_elasticsearch_configuration
+    create_meta_indexes
+    reset_content_indexes_with_content
+  end
+
+  def stub_elasticsearch_configuration
+    stub_elasticsearch_settings
     app.settings.search_config.stubs(:govuk_index_names).returns(INDEX_NAMES)
     SearchConfig.any_instance.stubs(:govuk_index_names).returns(INDEX_NAMES)
     enable_test_index_connections
+  end
 
+  def create_meta_indexes
+    AUXILIARY_INDEX_NAMES.each do |index|
+      create_test_index(index)
+    end
+  end
+
+  def reset_content_indexes
     INDEX_NAMES.each do |index_name|
       try_remove_test_index(index_name)
-      if index_name == "government_test"
-        add_field_to_mappings("public_timestamp", "date")
-      end
-      add_field_to_mappings("topics")
-      add_field_to_mappings("section")
-      add_field_to_mappings("format")
       create_test_index(index_name)
-      add_sample_documents(index_name, 2)
-      commit_index(index_name)
     end
+  end
+
+  def reset_content_indexes_with_content(params = { section_count: 2 })
+    reset_content_indexes
+    populate_content_indexes(params)
   end
 
   def teardown
-    INDEX_NAMES.each do |index_name|
-      clean_index_group(index_name)
-    end
+    clean_test_indexes
   end
 
-  def sample_document_attributes(index_name, count)
+  def sample_document_attributes(index_name, section_count)
     short_index_name = index_name.sub("_test", "")
-    (1..count).map do |i|
-      fields = {
-        "title" => "Sample #{short_index_name} document #{i}",
-        "link" => "/#{short_index_name}-#{i}",
-        "indexable_content" => "Something something important content",
-      }
-      fields["section"] = i
-      if i % 2 == 0
-        fields["topics"] = ["farming"]
+    (1..section_count).map do |i|
+      title = "Sample #{short_index_name} document #{i}"
+      if i % 2 == 1
+        title = title.downcase
       end
+      fields = {
+        "title" => title,
+        "link" => "/#{short_index_name}-#{i}",
+        "indexable_content" => "Something something important content id #{i}",
+      }
       fields["section"] = ["#{i}"]
+      if i % 2 == 0
+        fields["specialist_sectors"] = ["farming"]
+      end
       if short_index_name == "government"
         fields["public_timestamp"] = "#{i+2000}-01-01T00:00:00"
       end
@@ -57,9 +66,22 @@ class MultiIndexTest < IntegrationTest
   def add_sample_documents(index_name, count)
     attributes = sample_document_attributes(index_name, count)
     attributes.each do |sample_document|
-      post "/#{index_name}/documents", MultiJson.encode(sample_document)
-      assert last_response.ok?
+      insert_document(index_name, sample_document)
     end
+
+    commit_index(index_name)
+  end
+
+  def insert_document(index_name, attributes)
+    attributes.stringify_keys!
+    insert_stub_popularity_data(attributes["link"])
+    post "/#{index_name}/documents", attributes.to_json
+    assert last_response.ok?, "Failed to insert document"
+  end
+
+  def commit_document(index_name, attributes)
+    insert_document(index_name, attributes)
+    commit_index(index_name)
   end
 
   def commit_index(index_name)
@@ -67,6 +89,14 @@ class MultiIndexTest < IntegrationTest
   end
 
   def parsed_response
-    MultiJson.decode(last_response.body)
+    JSON.parse(last_response.body)
+  end
+
+  private
+
+  def populate_content_indexes(params)
+    INDEX_NAMES.each do |index_name|
+      add_sample_documents(index_name, params[:section_count])
+    end
   end
 end

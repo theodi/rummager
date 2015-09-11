@@ -1,4 +1,6 @@
 require "logging"
+require "dotenv"
+Dotenv.load
 
 module Elasticsearch
   class Client
@@ -8,7 +10,7 @@ module Elasticsearch
     SAFE_ABSOLUTE_PATHS = ["/_bulk", "/_status", "/_aliases", "/_search/scroll"]
 
     def initialize(base_uri, args = {})
-      @base_uri = base_uri
+      @base_uri = base_uri || ENV['QUIRKAFLEEG_ELASTICSEARCH_LOCATION']
       @error_log_level = :error
       @timeout = args[:timeout]
       @open_timeout = args[:open_timeout]
@@ -88,6 +90,13 @@ module Elasticsearch
 
     def logging_exception_body(&block)
       yield
+    rescue RestClient::BadRequest => error
+      logger.send(
+        @error_log_level,
+        "BadRequest error from elasticsearch. " +
+        "Response: #{error.http_body}"
+      )
+      raise
     rescue RestClient::InternalServerError => error
       logger.send(
         @error_log_level,

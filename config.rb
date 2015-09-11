@@ -2,11 +2,12 @@ require "sinatra"
 require_relative "env"
 require "search_config"
 require "config/logging"
+require "airbrake"
 
 set :search_config, SearchConfig.new
 set :default_index_name, "dapaas"
 
-configure :development do
+configure :development, :test do
   set :protection, false
 end
 
@@ -17,3 +18,8 @@ disable :show_exceptions
 initializers_path = File.expand_path("config/initializers/*.rb", File.dirname(__FILE__))
 
 Dir[initializers_path].each { |f| require f }
+
+configure do
+  Airbrake.configuration.ignore << "Sinatra::NotFound"
+  use Airbrake::Sinatra
+end

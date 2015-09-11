@@ -4,7 +4,7 @@ namespace :router do
     require 'gds_api/router'
 
     @router_api = GdsApi::Router.new(Plek.current.find('router-api'))
-    @app_id = 'search'
+    @app_id = 'rummager'
   end
 
   task :register_backend => :router_environment do
@@ -20,7 +20,7 @@ namespace :router do
     ].each do |path, type|
       begin
         puts "Registering #{type} route #{path}"
-        @router_api.add_route path, type, @app_id, :skip_commit => true
+        @router_api.add_route path, type, @app_id
       rescue => e
         puts "Error registering route: #{e.message}"
         raise

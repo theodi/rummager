@@ -3,7 +3,6 @@ require "securerandom"
 require "rest-client"
 require "cgi"
 require "elasticsearch/index"
-require "promoted_result"
 
 module Elasticsearch
 
@@ -16,35 +15,35 @@ module Elasticsearch
   #
   # One of these indexes is aliased to the group name itself.
   class IndexGroup
-    attr_reader :promoted_results
-
-    def initialize(base_uri, name, index_settings, mappings, promoted_results = [])
+    def initialize(base_uri, name, schema, search_config)
       @base_uri = base_uri
       @client = Client.new(base_uri)
       @name = name
-      @index_settings = index_settings
-      @mappings = mappings
-      @promoted_results = promoted_results
+      @schema = schema
+      @search_config = search_config
     end
 
     def create_index
       index_name = generate_name
-      index_payload = @index_settings.merge("mappings" => @mappings)
+      index_payload = {
+        "settings" => settings,
+        "mappings" => mappings,
+      }
       @client.put(
         "#{CGI.escape(index_name)}/",
-        MultiJson.encode(index_payload),
+        index_payload.to_json,
         content_type: :json
       )
 
       logger.info "Created index #{index_name}"
 
-      Index.new(@base_uri, index_name, @mappings, @promoted_results)
+      Index.new(@base_uri, index_name, @name, mappings, @search_config)
     end
 
     def switch_to(index)
       # Loading this manually rather than using `index_map` because we may have
       # unaliased indices, which won't match the new naming convention.
-      indices = MultiJson.decode(@client.get("_aliases"))
+      indices = JSON.parse(@client.get("_aliases"))
 
       # Bail if there is an existing index with this name.
       # elasticsearch won't allow us to add an alias with the same name as an
@@ -57,7 +56,7 @@ module Elasticsearch
       # Response of the form:
       #   { "index_name" => { "aliases" => { "a1" => {}, "a2" => {} } }
       aliased_indices = indices.select { |name, details|
-        details["aliases"].include? @name
+        details.fetch("aliases", {}).include? @name
       }
 
       # For any existing indices with this alias, remove the alias
@@ -78,13 +77,13 @@ module Elasticsearch
 
       @client.post(
         "/_aliases",
-        MultiJson.encode(payload),
+        payload.to_json,
         content_type: :json
       )
     end
 
     def current
-      Index.new(@base_uri, @name, @mappings, @promoted_results)
+      Index.new(@base_uri, @name, @name, mappings, @search_config)
     end
 
     # The unaliased version of the current index
@@ -94,7 +93,7 @@ module Elasticsearch
     def current_real
       current_index = current
       if current_index.exists?
-        Index.new(@base_uri, current.real_name, @mappings, @promoted_results)
+        Index.new(@base_uri, current.real_name, @name, mappings, @search_config)
       else
         nil
       end
@@ -106,13 +105,21 @@ module Elasticsearch
 
     def clean
       alias_map.each do |name, details|
-        delete(name) if details["aliases"].empty?
+        delete(name) if details.fetch("aliases", {}).empty?
       end
     end
 
   private
     def logger
       Logging.logger[self]
+    end
+
+    def settings
+      @settings ||= @schema.elasticsearch_settings(@name)
+    end
+
+    def mappings
+      @mappings ||= @schema.elasticsearch_mappings(@name)
     end
 
     def generate_name
@@ -124,7 +131,7 @@ module Elasticsearch
     def alias_map
       # Return a map of all aliases in this group, of the form:
       # { concrete_name => { "aliases" => { alias_name => {}, ... } }, ... }
-      indices = MultiJson.decode(@client.get("_aliases"))
+      indices = JSON.parse(@client.get("_aliases"))
       indices.select { |name| name_pattern.match name }
     end
 
@@ -138,7 +145,7 @@ module Elasticsearch
         \d{2}:\d{2}:\d{2}  # Time
         z
         -
-        \h{8}-\h{4}-\h{4}-\h{4}-\h{12}  # UUID
+        \h[-\h]*  # UUID
         \Z
       }x
     end

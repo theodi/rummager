@@ -1,22 +1,33 @@
 require "yaml"
 require "elasticsearch/search_server"
+require "schema_config"
+require "plek"
 
 class SearchConfig
-
   def search_server
-    Elasticsearch::SearchServer.new(
+    @server ||= Elasticsearch::SearchServer.new(
       ENV['QUIRKAFLEEG_ELASTICSEARCH_LOCATION'] || elasticsearch["base_uri"],
-      elasticsearch_schema,
-      index_names
+      schema_config,
+      index_names,
+      content_index_names,
+      self,
     )
   end
 
-  def index_names
-    elasticsearch["index_names"]
+  def schema_config
+    @schema ||= SchemaConfig.new(config_path)
   end
 
-  def elasticsearch_schema
-    @elasticsearch_schema ||= config_for("elasticsearch_schema")
+  def index_names
+    content_index_names + auxiliary_index_names
+  end
+
+  def content_index_names
+    elasticsearch["content_index_names"] || []
+  end
+
+  def auxiliary_index_names
+    elasticsearch["auxiliary_index_names"] || []
   end
 
   def elasticsearch
@@ -35,6 +46,10 @@ class SearchConfig
     elasticsearch["organisation_registry_index"]
   end
 
+  def people_registry_index
+    elasticsearch["people_registry_index"]
+  end
+
   def topic_registry_index
     elasticsearch["topic_registry_index"]
   end
@@ -47,7 +62,23 @@ class SearchConfig
     elasticsearch["govuk_index_names"]
   end
 
+  def metasearch_index_name
+    elasticsearch["metasearch_index_name"]
+  end
+
+  def popularity_rank_offset
+    elasticsearch["popularity_rank_offset"]
+  end
+
 private
+  def config_path
+    File.expand_path("../config/schema", File.dirname(__FILE__))
+  end
+
+  def in_development_environment?
+    %w{development test}.include?(ENV['RACK_ENV'])
+  end
+
   def config_for(kind)
     YAML.load_file(File.expand_path("../#{kind}.yml", File.dirname(__FILE__)))
   end

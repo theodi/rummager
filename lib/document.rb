@@ -2,16 +2,22 @@ class Document
 
   attr_reader :es_score
 
-  def initialize(field_names, attributes = {}, es_score = nil)
-    @field_names = field_names.map(&:to_s)
+  def initialize(field_definitions, attributes = {}, es_score = nil)
+    @field_definitions = field_definitions
     @attributes = {}
     @es_score = es_score
     update_attributes!(attributes)
+    @id = attributes["_id"]
+    @type = attributes["_type"]
   end
 
-  def self.from_hash(hash, mappings, es_score = nil)
-    field_names = mappings["edition"]["properties"].keys.map(&:to_s)
-    self.new(field_names, hash, es_score)
+  def self.from_hash(hash, document_types, es_score = nil)
+    type = hash["_type"] || "edition"
+    doc_type = document_types[type]
+    if doc_type.nil?
+      raise "Unexpected document type '#{type}'. Document types must be configured"
+    end
+    self.new(doc_type.fields, hash, es_score)
   end
 
   def update_attributes!(attributes)
@@ -21,27 +27,40 @@ class Document
   end
 
   def has_field?(field_name)
-    @field_names.include?(field_name.to_s)
+    @field_definitions.include?(field_name.to_s)
   end
 
-  def get(key)
-    @attributes[key.to_s]
-  end
-
-  def set(key, value)
-    if has_field?(key)
-      @attributes[key.to_s] = value
+  def get(field_name)
+    field_name = field_name.to_s
+    values = @attributes[field_name]
+    # Convert to array for consistency between elasticsearch 0.90 and 1.0.
+    # When we no longer support elasticsearch <1.0, values in @attributes will
+    # always be arrays.
+    if values.nil?
+      values = []
+    elsif !(values.is_a?(Array))
+      values = [values]
+    end
+    if @field_definitions[field_name].type.multivalued
+      values
+    else
+      values.first
     end
   end
 
-  def weighted(factor)
-    weighted_score = @es_score ? @es_score * factor : nil
-    Document.new(@field_names, @attributes, weighted_score)
+  def set(field_name, value)
+    field_name = field_name.to_s
+    if has_field?(field_name)
+      if value.is_a?(Array) && value.size > 1 && !@field_definitions[field_name].type.multivalued
+        raise "Multiple values supplied for '#{field_name}' which is a single-valued field"
+      end
+      @attributes[field_name] = value
+    end
   end
 
   def elasticsearch_export
     Hash.new.tap do |doc|
-      @field_names.each do |key|
+      @field_definitions.keys.each do |key|
         value = get(key)
         if value.is_a?(Array)
           value = value.map {|v| v.is_a?(Document) ? v.elasticsearch_export : v }
@@ -50,18 +69,21 @@ class Document
           doc[key] = value
         end
       end
-      doc["_type"] = "edition"
+      doc["_type"] = @type || "edition"
+      doc["_id"] = @id if @id
     end
   end
 
   def to_hash
-    field_values = Hash[@field_names.map { |key|
-      value = get(key)
+    field_values = Hash[@field_definitions.keys.map { |field_name|
+      value = get(field_name)
       if value.is_a?(Array)
         value = value.map { |v| v.is_a?(Document) ? v.to_hash : v }
+      else
+        value = value.is_a?(Document) ? value.to_hash : value
       end
-      [key.to_s, value]
-    }.select{ |key, value|
+      [field_name.to_s, value]
+    }.select{ |_, value|
       ![nil, []].include?(value)
     }]
 
