@@ -8,7 +8,7 @@ class UnifiedSearch::SpellCheckFetcherTest < ShouldaUnitTestCase
       UnifiedSearch::SuggestionBlacklist.any_instance.stubs(should_correct?: true)
 
       stub_elasticsearch_request(
-        '/mainstream,government/_search' => { suggest: { spelling_suggestions: 'a-hash' } }
+        '/dapaas,odi/_search' => { suggest: { spelling_suggestions: 'a-hash' } }
       )
 
       es_response = UnifiedSearch::SpellCheckFetcher.new('bolo', stub('registries')).es_response
