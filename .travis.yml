@@ -45,5 +45,6 @@ env:
   - PANOPTICON_PASSWORD: mysuperawesomepassword
   - CONTENTAPI_DEFAULT_ROLE: odi
   - RUMMAGER_HOST: http://search.dev
+  - QUIRKAFLEEG_ELASTICSEARCH_LOCATION: http://localhost:9200
   - secure: Tf0wil4Gx4e00gV2G300h8UfKnBC+D3BextrYiGNHXaydjNsl6fBh85MVa3hfISJHEuE+uKYWwiJpMqRudibLfbssAn/YysymY5vayOdr8ayJUdjmJAkzZt8GJrOM1IG2E6BAeCFETDGnRH1d3We3GnikqdpP7u16/7saYJULPc=
   - secure: R5LsgTYEsweOSqArgVpYYJ35yzT2Enon6SXAM8QfxqFci8hjB3sDabT+Jf5ca/mfDmzl5YEBmedYzdLhyZd5ifNmO//n7LsrZ2KmE0uUiFufvRH02eDlOYfoOOUqFv2HZdEquD1i0w53854mz0CUZK+TJbF427ojmQTLn3NqGxI=
