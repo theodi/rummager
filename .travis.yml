@@ -3,12 +3,14 @@ sudo: true
 cache: bundler
 rvm:
 - 2.1.6
-after_success:
-- ! '[ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] &&
-  curl -v -X DELETE -u $GITHUB_USER:$GITHUB_PASSWORD "https://api.github.com/repos/$TRAVIS_REPO_SLUG/git/refs/tags/CURRENT"'
-- ! '[ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] &&
-  curl -v -X POST -d ''{"ref":"refs/tags/CURRENT","sha":"''$TRAVIS_COMMIT''"}''  --header
-  "Content-Type:application/json" -u $GITHUB_USER:$GITHUB_PASSWORD "https://api.github.com/repos/$TRAVIS_REPO_SLUG/git/refs"'
+deploy:
+  provider: heroku
+  strategy: api
+  app: odi-rummager
+  on:
+    repo: theodi/rummager
+  api_key:
+    secure: jbPeh9KiLPN/Qfw43SggdFLoaCkKAKWIWDR8AkJkgX7heH9kuIuD1fHQGuiuk3a6/p6zMIcnKrcxdZiR5fwcXvfNs+SDzm3HMVut79oAgGFYgmu0G0SpV8hv3e8g+6QzWZLzGMDj6wDTAwynGR9wdyibOf0qqSjqde0PVyUDlHY=
 services:
 - redis-server
 addons:
@@ -18,12 +20,12 @@ addons:
     - aspell-en
     - libaspell-dev
 before_install:
-  - wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.4.4.deb
-  - sudo dpkg -i elasticsearch-1.4.4.deb
-  - sudo update-rc.d elasticsearch defaults 95 10
-  - 'echo "script.disable_dynamic: false" | sudo tee -a /etc/elasticsearch/elasticsearch.yml'
-  - sudo /etc/init.d/elasticsearch start
-  - sleep 10
+- wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.4.4.deb
+- sudo dpkg -i elasticsearch-1.4.4.deb
+- sudo update-rc.d elasticsearch defaults 95 10
+- 'echo "script.disable_dynamic: false" | sudo tee -a /etc/elasticsearch/elasticsearch.yml'
+- sudo /etc/init.d/elasticsearch start
+- sleep 10
 branches:
   except:
   - CURRENT
@@ -32,7 +34,7 @@ notifications:
     channels:
     - irc.freenode.net#theodi
     template:
-    - ! '%{repository} %{branch} - %{message} %{build_url}'
+    - "%{repository} %{branch} - %{message} %{build_url}"
     on_success: change
     on_failure: always
 env:
