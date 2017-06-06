@@ -36,7 +36,7 @@ end
 
 group :development do
   # (Intelligent) reloading server in development
-  gem "mr-sparkle", "0.2.0"
+  gem "mr-sparkle", "0.3.0"
 end
 
 gem "pry", group: [:development, :test]
