@@ -19,7 +19,7 @@ gem "plek", "1.5.0"
 gem "gds-api-adapters", "~> 21.0"
 gem "rack-logstasher", "0.0.3"
 gem 'airbrake', '~> 4.0'
-gem "unf", "0.1.3"
+gem "unf", "0.1.4"
 
 group :test do
   gem "shoulda-context"
