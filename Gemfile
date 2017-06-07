@@ -18,7 +18,7 @@ gem "redis-namespace", "1.3.1"
 gem "plek", "1.5.0"
 gem "gds-api-adapters", "~> 21.0"
 gem "rack-logstasher", "0.0.3"
-gem 'airbrake', '~> 4.0'
+gem 'airbrake', '~> 6.1'
 gem "unf", "0.1.3"
 
 group :test do
