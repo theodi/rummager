@@ -8,7 +8,7 @@ gem "rake", "12.0.0", :require => false
 gem "rack", "~> 1.6"
 gem "rest-client", "1.8.0"
 gem "logging", "2.2.2"
-gem 'nokogiri', "~> 1.5"
+gem 'nokogiri', "~> 1.8"
 gem 'whenever', require: false
 gem "slop", "3.6.0"
 gem "sidekiq", "2.13.0"
