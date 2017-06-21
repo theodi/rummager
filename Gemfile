@@ -13,7 +13,7 @@ gem 'whenever', require: false
 gem "slop", "3.6.0"
 gem "sidekiq", "2.13.0"
 # pin to version that includes security vulnerability fix
-gem "activesupport", "~> 3.2"
+gem "activesupport", "~> 4.0"
 gem "redis-namespace", "1.5.3"
 gem "plek", "2.0.0"
 gem "gds-api-adapters", "~> 21.0"
