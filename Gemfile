@@ -15,7 +15,7 @@ gem "sidekiq", "2.13.0"
 # pin to version that includes security vulnerability fix
 gem "activesupport", "~> 3.2"
 gem "redis-namespace", "1.5.3"
-gem "plek", "1.5.0"
+gem "plek", "2.0.0"
 gem "gds-api-adapters", "~> 21.0"
 gem "rack-logstasher", "0.0.3"
 gem 'airbrake', '~> 4.0'
