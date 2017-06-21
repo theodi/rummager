@@ -10,7 +10,7 @@ gem "rest-client", "1.8.0"
 gem "logging", "1.8.1"
 gem 'nokogiri', "~> 1.5"
 gem 'whenever', require: false
-gem "slop", "3.4.5"
+gem "slop", "3.6.0"
 gem "sidekiq", "2.13.0"
 # pin to version that includes security vulnerability fix
 gem "activesupport", "~> 3.2"
