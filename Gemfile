@@ -27,7 +27,7 @@ group :test do
   gem "simplecov-rcov"
   gem 'turn', require: false # Pretty printed test output
   gem "ci_reporter", "1.7.1"
-  gem "minitest", "4.6.1"
+  gem "minitest", "4.7.5"
   gem "rack-test"
   gem "mocha", :require => false
   gem "webmock", "~> 1.21.0", require: false
