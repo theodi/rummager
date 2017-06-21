@@ -16,7 +16,7 @@ gem "sidekiq", "2.13.0"
 gem "activesupport", "~> 3.2"
 gem "redis-namespace", "1.5.3"
 gem "plek", "1.5.0"
-gem "gds-api-adapters", "~> 21.0"
+gem "gds-api-adapters", "~> 27.1"
 gem "rack-logstasher", "0.0.3"
 gem 'airbrake', '~> 4.0'
 gem "unf", "0.1.4"
