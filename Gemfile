@@ -31,7 +31,7 @@ group :test do
   gem "rack-test"
   gem "mocha", :require => false
   gem "webmock", "~> 1.21.0", require: false
-  gem "timecop", "0.8.1"
+  gem "timecop", "0.9.0"
 end
 
 group :development do
