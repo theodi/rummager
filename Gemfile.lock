@@ -9,11 +9,11 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 0.3.37)
     addressable (2.3.8)
-    airbrake (4.3.0)
-      builder
-      multi_json
+    airbrake (6.1.2)
+      airbrake-ruby (~> 2.2, >= 2.2.5)
+    airbrake-ruby (2.2.6)
     ansi (1.5.0)
-    builder (3.2.2)
+    builder (3.2.3)
     celluloid (0.17.0)
       bundler
       celluloid-essentials
@@ -197,7 +197,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport (~> 4.0)
-  airbrake (~> 4.0)
+  airbrake (~> 6.1)
   ci_reporter (= 1.7.1)
   foreman (< 0.65.0)
   gds-api-adapters (~> 21.0)
