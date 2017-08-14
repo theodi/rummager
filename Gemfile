@@ -23,7 +23,7 @@ gem "unf", "0.1.4"
 
 group :test do
   gem "shoulda-context"
-  gem "simplecov", "~> 0.14.1"
+  gem "simplecov", "~> 0.15.0"
   gem "simplecov-rcov"
   gem 'turn', require: false # Pretty printed test output
   gem "ci_reporter", "1.7.1"
