@@ -11,7 +11,7 @@ gem "logging", "2.2.2"
 gem 'nokogiri', "~> 1.5"
 gem 'whenever', require: false
 gem "slop", "3.6.0"
-gem "sidekiq", "2.13.0"
+gem "sidekiq", "5.0.5"
 # pin to version that includes security vulnerability fix
 gem "activesupport", "~> 4.0"
 gem "redis-namespace", "1.5.3"
