@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 gem "thin"
 gem "foreman", "< 0.65.0"
-gem "unicorn", "4.6.2"
+gem "unicorn", "5.3.1"
 gem "sinatra", "1.3.4"
 gem "rake", "12.0.0", :require => false
 gem "rack", "~> 1.6"
