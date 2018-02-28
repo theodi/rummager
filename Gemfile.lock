@@ -120,7 +120,7 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    rack (1.6.8)
+    rack (1.6.9)
     rack-cache (1.2)
       rack (>= 0.4)
     rack-logstasher (0.0.3)
@@ -128,8 +128,8 @@ GEM
       rack
     rack-protection (1.5.3)
       rack
-    rack-test (0.6.3)
-      rack (>= 1.0)
+    rack-test (0.8.3)
+      rack (>= 1.0, < 3)
     raindrops (0.18.0)
     rake (12.0.0)
     rb-fsevent (0.9.8)
